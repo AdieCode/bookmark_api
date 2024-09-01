@@ -11,8 +11,16 @@ app.use(bodyParser.json());
 
 // Define a route
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.send('This is the bookmark api');
 });
+
+// Requiring routers
+const loginRouter = require('./routes/auth/login');
+const signUpRouter = require('./routes/auth/sign-up');
+
+app.use('/auth/login', loginRouter);
+app.use('/auth/sign-up', signUpRouter);
+
 
 // Start the server
 app.listen(port, () => {
