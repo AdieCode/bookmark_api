@@ -36,11 +36,11 @@ const addData = {
         }
     },
 
-    addUserReadableContent: async function(user_id, vol, chap, personal_score, content_status, callback) {
+    addUserReadableContent: async function(user_id, content_id, vol, chap, personal_score, content_status, callback) {
         try {
             const date = new Date();
             // Insert the new user into the database
-            await BookmarkDB.query('INSERT INTO user_readable_content (user_id, current_vol, current_chapter, personal_score, status) VALUES ($1, $2, $3, $4, $5)', [user_id, vol, chap, personal_score, content_status]);
+            await BookmarkDB.query('INSERT INTO user_readable_content (user_id, content_id, current_vol, current_chapter, personal_score, status) VALUES ($1, $2, $3, $4, $5, $6)', [user_id, content_id, vol, chap, personal_score, content_status]);
 
             // User added successfully
             callback(null, true);
