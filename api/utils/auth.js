@@ -31,11 +31,14 @@ async function checkPassword(inputPassword, hashedPassword) {
 
 
 const isAuthenticated = (req, res, next) => {
-    const token = req.headers.authorization.replace('Bearer ' , '');
+    const authHeader = req.headers.authorization;
 
-    if (!token) {
-        return res.status(401).json({ auth: false, error: 'No token provided' });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ auth: false, error: 'No valid token provided' });
     }
+
+    const token = authHeader.replace('Bearer ', '');
+
     jwt.verify(token, secret, (err, decoded) => {
         if (err) {
             return res.status(401).json({ auth: false, error: 'Unauthorized, you are not authorized to access this endpoint' });
@@ -44,5 +47,22 @@ const isAuthenticated = (req, res, next) => {
         next();
     });
 };
+
+// OLD AUTH MEHOD
+
+// const isAuthenticated = (req, res, next) => {
+//     const token = req.headers.authorization.replace('Bearer ' , '');
+
+//     if (!token) {
+//         return res.status(401).json({ auth: false, error: 'No token provided' });
+//     }
+//     jwt.verify(token, secret, (err, decoded) => {
+//         if (err) {
+//             return res.status(401).json({ auth: false, error: 'Unauthorized, you are not authorized to access this endpoint' });
+//         }
+//         req.user = decoded;
+//         next();
+//     });
+// };
 
 module.exports = { hashPassword, checkPassword, isAuthenticated };
