@@ -1,6 +1,5 @@
-const { Pool } = require('pg');
 const BookmarkDB = require('./pool.js');
-const { hashPassword, checkPassword } = require('../utils/auth.js');
+const { checkPassword } = require('../utils/auth.js');
 
 
 const getData = {
@@ -33,7 +32,6 @@ const getData = {
                 callback(err, false);
                 return;
             }
-            console.log(res.rows)
             
             // Check if any matching records were found
             if (res.rows.length > 0) {
@@ -50,6 +48,16 @@ const getData = {
             }
         });
     },
+
+    getAllRows: async function(tableName) {
+        try {
+            const result = await BookmarkDB.query(`SELECT * FROM ${tableName}`);
+            return result.rows; 
+        } catch (error) {
+            console.error(`Error retrieving all rows from table ${tableName}:`, error);
+            throw error;
+        }
+    }
 }
 
 module.exports = getData;

@@ -1,6 +1,5 @@
-const { Pool } = require('pg');
 const BookmarkDB = require('./pool.js');
-const { hashPassword, checkPassword } = require('../utils/auth.js');
+const { hashPassword } = require('../utils/auth.js');
 const getData = require('./get.js');
 
 

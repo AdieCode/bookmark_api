@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
-    "dev": "nodemon api/main.js"
+    "dev": "nodemon api/main.js",
+    "test": "mocha --require @babel/register 'tests/**/*.test.cjs'"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +19,7 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "on-finished": "^2.4.1",
     "pg": "^8.12.0"
   },
   "devDependencies": {

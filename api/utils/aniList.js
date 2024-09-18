@@ -1,5 +1,5 @@
 var query = `
-query ($id: Int, $page: Int, $perPage: Int, $search: String, $type: MediaType) {
+query ($id: Int, $page: Int, $perPage: Int, $search: String, $type: MediaType, $sort: [MediaSort]) {
   Page(page: $page, perPage: $perPage) {
     pageInfo {
       total
@@ -8,31 +8,27 @@ query ($id: Int, $page: Int, $perPage: Int, $search: String, $type: MediaType) {
       hasNextPage
       perPage
     }
-    media(id: $id, search: $search, type: $type) {
+    media(id: $id, search: $search, type: $type, sort: $sort) {
       id
       title {
         romaji
         english
         native
       }
+      genres 
       description
       type
       coverImage {
         extraLarge  
       }
       status
-      averageScore 
+      averageScore
+      volumes
+      chapters
     }
   }
 }
 `;
-
-var variables = {
-    search: "isekai",  // Change this to search for something else
-    page: 1,              // The page number to fetch
-    perPage: 100,           // Number of results per page
-    type: "MANGA"       // Type of media to filter by
-};
 
 var url = 'https://graphql.anilist.co';
 var options = {
@@ -40,11 +36,7 @@ var options = {
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-    },
-    body: JSON.stringify({
-        query: query,
-        variables: variables
-    })
+    }
 };
 
 const handleResponse = async (response) => {
@@ -56,26 +48,8 @@ const handleResponse = async (response) => {
     }
 };
 
-const truncateDescription = (description, maxLength) => {
-    if (description.length > maxLength) {
-        return description.substring(0, maxLength) + '...'; // Append ellipsis
-    }
-    return description;
-};
-
 const handleData = (data) => {
-    console.log('Data received:', data);
     if (data && data.data && data.data.Page && data.data.Page.media) {
-        // Limit description length
-        const maxLength = 200; // Set your desired maximum length here
-        data.data.Page.media.forEach(item => {
-            if (item.description) {
-                item.description = truncateDescription(item.description, maxLength);
-            }
-        });
-
-        console.log('Limited Data:', data);
-        // Handle the limited data (e.g., render it to the page)
         return data;
     } else {
         throw new Error('Invalid data format');
@@ -84,12 +58,27 @@ const handleData = (data) => {
 
 const handleError = (error) => {
     console.error('Error occurred:', error);
-    // Handle errors (e.g., show a message to the user)
 };
 
-const getManga = async () => {
+const getContentFromAnilist = async (type = null, searchTerm = null, page = 1, perPage = 100, sort = 'POPULARITY_DESC') => {
+    // Set variables dynamically based on searchTerm
+    var variables = {
+        search: searchTerm || null,  // Use the search term or default to null if empty
+        page: page,                  // Default to page 1
+        perPage: perPage,            // Default to 100 results per page
+        type: type,               // Static filter for media type
+        sort: searchTerm ? null : [sort] // If search term is provided, don't use sort, otherwise use sorting
+    };
+
     try {
-        const response = await fetch(url, options);
+        // Merge the query with the updated variables
+        const response = await fetch(url, {
+            ...options,
+            body: JSON.stringify({
+                query: query,
+                variables: variables
+            })
+        });
         const data = await handleResponse(response);
         return handleData(data);
     } catch (error) {
@@ -97,6 +86,4 @@ const getManga = async () => {
     }
 };
 
-getManga();
-
-module.exports = getManga;
+module.exports = getContentFromAnilist;

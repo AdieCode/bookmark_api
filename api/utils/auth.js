@@ -29,40 +29,31 @@ async function checkPassword(inputPassword, hashedPassword) {
     }
 }
 
-
 const isAuthenticated = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ auth: false, error: 'No valid token provided' });
-    }
-
-    const token = authHeader.replace('Bearer ', '');
-
-    jwt.verify(token, secret, (err, decoded) => {
-        if (err) {
-            return res.status(401).json({ auth: false, error: 'Unauthorized, you are not authorized to access this endpoint' });
+    try {
+        const authHeader = req.headers.authorization;
+        
+        if(!authHeader){
+            throw new Error("No token provided");
+            
+        } else if(!authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ auth: false, error: 'invalid token provided, Bearer is missing ' });
         }
-        req.user = decoded;
-        next();
-    });
+    
+        const token = authHeader.replace('Bearer ', '');
+    
+        jwt.verify(token, secret, (err, decoded) => {
+            if (err) {
+                return res.status(401).json({ auth: false, error: 'Unauthorized, you are not authorized to access this endpoint' });
+            }
+            req.user = decoded;
+            next();
+        });
+
+    } catch (error) {
+        console.log("Error occurred :", error)
+        return res.status(500).json({ auth: false, error: 'No token provided' });
+    }
 };
-
-// OLD AUTH MEHOD
-
-// const isAuthenticated = (req, res, next) => {
-//     const token = req.headers.authorization.replace('Bearer ' , '');
-
-//     if (!token) {
-//         return res.status(401).json({ auth: false, error: 'No token provided' });
-//     }
-//     jwt.verify(token, secret, (err, decoded) => {
-//         if (err) {
-//             return res.status(401).json({ auth: false, error: 'Unauthorized, you are not authorized to access this endpoint' });
-//         }
-//         req.user = decoded;
-//         next();
-//     });
-// };
 
 module.exports = { hashPassword, checkPassword, isAuthenticated };
