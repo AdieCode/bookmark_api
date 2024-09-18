@@ -37,13 +37,22 @@ const addData = {
 
     addUserReadableContent: async function(user_id, content_id, vol, chap, personal_score, content_status, callback) {
         try {
-            // Insert the new user into the database
             await BookmarkDB.query('INSERT INTO user_readable_content (user_id, content_id, current_vol, current_chapter, personal_score, status) VALUES ($1, $2, $3, $4, $5, $6)', [user_id, content_id, vol, chap, personal_score, content_status]);
 
-            // User added successfully
             callback(null, true);
         } catch (error) {
-            console.error('Error adding user:', error);
+            console.error('Error adding user readable content:', error);
+            callback(error, false);
+        }
+    },
+    
+    addUserWatchableContent: async function(user_id, content_id, current_season, current_episode, personal_score, content_status, callback) {
+        try {
+            await BookmarkDB.query('INSERT INTO user_watchable_content (user_id, content_id, current_season, current_episode, personal_score, status) VALUES ($1, $2, $3, $4, $5, $6)', [user_id, content_id, current_season, current_episode, personal_score, content_status]);
+
+            callback(null, true);
+        } catch (error) {
+            console.error('Error adding user watchable content:', error);
             callback(error, false);
         }
     },
@@ -57,10 +66,24 @@ const addData = {
             // User added successfully
             callback(null, true);
         } catch (error) {
-            console.error('Error adding user:', error);
+            console.error('Error adding readable content:', error);
+            callback(error, false);
+        }
+    },
+
+    addWatchableContent: async function(anilist_content_id, title, description, cover_image_url, release_date, type, callback) {
+        try {
+            const date = new Date();
+            // Insert the new user into the database
+            await BookmarkDB.query('INSERT INTO watchable_content (anilist_content_id, title, description, cover_image_url, release_date, type) VALUES ($1, $2, $3, $4, $5, $6)', [anilist_content_id, title, description, cover_image_url, release_date, type]);
+
+            // User added successfully
+            callback(null, true);
+        } catch (error) {
+            console.error('Error adding watchable content:', error);
             callback(error, false);
         }
     },
 }
 
-module.exports = { addData };
+module.exports = addData;

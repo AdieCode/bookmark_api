@@ -49,6 +49,79 @@ const getData = {
         });
     },
 
+    getUserReadableContent: async function(user_id, callback) {
+        try {
+            const result = await BookmarkDB.query(
+                'SELECT user_id, content_id, current_vol, current_chapter, personal_score, status FROM user_readable_content WHERE user_id = $1',
+                [user_id]
+            );
+    
+            if (result.rows.length > 0) {
+                callback(null, result.rows);
+            } else {
+                callback('No content found for this user ID', null);
+            }
+        } catch (error) {
+            console.error('Error retrieving readable content:', error);
+            callback(error, false);
+        }
+    },
+    
+    getUserWatchableContent: async function(user_id, callback) {
+        try {
+            const result = await BookmarkDB.query(
+                'SELECT user_id, content_id, current_season, current_episode, personal_score, status FROM user_watchable_content WHERE user_id = $1',
+                [user_id]
+            );
+    
+            if (result.rows.length > 0) {
+                callback(null, result.rows);
+            } else {
+                callback('No content found for this user ID', null);
+            }
+        } catch (error) {
+            console.error('Error retrieving readable content:', error);
+            callback(error, false);
+        }
+    },  
+    
+    getReadableContent: async function(content_id, callback) {
+        try {
+            const result = await BookmarkDB.query(
+                'SELECT user_id, content_id, current_vol, current_chapter, personal_score, status FROM user_readable_content WHERE content_id = $1',
+                [content_id]
+            );
+    
+            if (result.rows.length > 0) {
+                callback(null, result.rows);
+            } else {
+                callback('No content found for this content ID', null);
+            }
+        } catch (error) {
+            console.error('Error retrieving readable content:', error);
+            callback(error, false);
+        }
+    },
+    
+    getWatchableContent: async function(content_id, callback) {
+        try {
+            const result = await BookmarkDB.query(
+                'SELECT user_id, content_id, current_season, current_episode, personal_score, status FROM user_watchable_content WHERE content_id = $1',
+                [content_id]
+            );
+    
+            if (result.rows.length > 0) {
+                callback(null, result.rows);
+            } else {
+                callback('No content found for this content ID', null);
+            }
+        } catch (error) {
+            console.error('Error retrieving readable content:', error);
+            callback(error, false);
+        }
+    },    
+
+
     getAllRows: async function(tableName) {
         try {
             const result = await BookmarkDB.query(`SELECT * FROM ${tableName}`);

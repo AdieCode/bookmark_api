@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const { addData } = require('../../data/add.js');
+const addData = require('../../data/add.js');
 require('dotenv').config(); 
 
 router.post('/check', (req, res, next) => {

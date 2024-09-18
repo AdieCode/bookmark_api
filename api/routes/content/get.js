@@ -1,59 +1,56 @@
 const express = require('express');
 const router = express.Router();
-const getData = require('../../data/get.js');
 const getContentFromAnilist = require("../../utils/aniList.js");
 const enrich = require("../../utils/enrich.js")
 
 router.get('/get_manga_content', async (req, res) => { 
     try {
-      let fetcedData = await getContentFromAnilist("MANGA"); 
-      const convertedFecthedResults = enrich.convertToStanderdContentFormat(fetcedData) 
-      const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
-      res.json(results); 
-      res.json(results); 
+		let fetcedData = await getContentFromAnilist("MANGA"); 
+		const convertedFecthedResults = enrich.convertToStanderdContentFormat(fetcedData) 
+		const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
+		res.json(results); 
     } catch (error) {
-      console.error('Error occurred in /get_content:', error);
-      res.status(500).send('Error occurred: ' + error.message);
+		console.error('Error occurred in /get_content:', error);
+		res.status(500).send('Error occurred: ' + error.message);
     }
 });
 
 router.get('/get_manga_content_specific', async (req, res) => { 
-  const search = req.body.search;
-  try {
-    let fetcedData = await getContentFromAnilist("MANGA", search); 
-    const convertedFecthedResults = enrich.convertToStanderdContentFormat(fetcedData) 
-    const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
-    res.json(results); 
-  } catch (error) {
-    console.error('Error occurred :', error);
-    res.status(500).send('Error occurred: ' + error.message);
-  }
+	const search = req.body.search;
+	try {
+		let fetcedData = await getContentFromAnilist("MANGA", search); 
+		const convertedFecthedResults = enrich.convertToStanderdContentFormat(fetcedData) 
+		const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
+		res.json(results); 
+	} catch (error) {
+		console.error('Error occurred :', error);
+		res.status(500).send('Error occurred: ' + error.message);
+	}
 });
 
 router.get('/get_anime_content', async (req, res) => { 
-  try {
-    let fetcedData = await getContentFromAnilist("ANIME"); 
-    const convertedFecthedResults = enrich.convertToStanderdContentFormat(fetcedData) 
-    const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
-    res.json(results); 
-    res.json(results); 
-  } catch (error) {
-    console.error('Error occurred in /get_content:', error);
-    res.status(500).send('Error occurred: ' + error.message);
-  }
+	try {
+		let fetcedData = await getContentFromAnilist("ANIME"); 
+		const convertedFecthedResults = enrich.convertToStanderdContentFormat(fetcedData) 
+		const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
+		res.json(results); 
+	} catch (error) {
+		console.error('Error occurred in /get_content:', error);
+		res.status(500).send('Error occurred: ' + error.message);
+	}
 });
 
 router.get('/get_anime_content_specific', async (req, res) => { 
-const search = req.body.search;
-try {
-  let fetcedData = await getContentFromAnilist("ANIME", search); 
-  const convertedFecthedResults = enrich.convertToStanderdContentFormat(fetcedData) 
-  const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
-  res.json(results); 
-} catch (error) {
-  console.error('Error occurred :', error);
-  res.status(500).send('Error occurred: ' + error.message);
-}
+	const search = req.body.search;
+	try {
+		let fetcedData = await getContentFromAnilist("ANIME", search); 
+		const convertedFecthedResults = enrich.convertToStanderdContentFormat(fetcedData) 
+		const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
+		res.json(results); 
+	} catch (error) {
+		console.error('Error occurred :', error);
+		res.status(500).send('Error occurred: ' + error.message);
+	}
 });
 
 module.exports = router;

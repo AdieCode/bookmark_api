@@ -27,65 +27,65 @@ function maskSensitiveData(data) {
 
 // logging api requests
 morgan.token('timestamp', function (req, res) {
-  return new Date().toISOString();
+	return new Date().toISOString();
 });
 
 morgan.token('request-headers', function (req, res) {
-  return JSON.stringify(req.headers, null, 2); // Format request headers with 2-space indentation
+	return JSON.stringify(req.headers, null, 2); 
 });
 
 morgan.token('request-body', function (req, res) {
-  const maskedBody = maskSensitiveData(req.body || req.params || 'no data received');
-  return JSON.stringify(maskedBody, null, 2); // Format request body with 2-space indentation
+	const maskedBody = maskSensitiveData(req.body || req.params || 'no data received');
+	return JSON.stringify(maskedBody, null, 2); 
 });
 
 morgan.token('response-body', function (req, res) {
-  if (res._responseBody) {
-    const maskedBody = maskSensitiveData(JSON.parse(res._responseBody));
-    return JSON.stringify(maskedBody, null, 2); // Format response body with 2-space indentation
-  }
-  return 'response not available';
+	if (res._responseBody) {
+		const maskedBody = maskSensitiveData(JSON.parse(res._responseBody));
+		return JSON.stringify(maskedBody, null, 2);
+	}
+	return 'response not available';
 });
 
 // Middleware to capture response body
 app.use((req, res, next) => {
-  const oldSend = res.send;
-  res._responseBody = ''; // Initialize empty response body
+	const oldSend = res.send;
+	res._responseBody = ''; // Initialize empty response body
 
-  res.send = function (body) {
-    // Capture the response body, ensure it's a valid JSON string
-    res._responseBody = typeof body === 'object' ? JSON.stringify(body, null, 2) : body;
-    return oldSend.apply(res, arguments); // Call the original send function
-  };
+	res.send = function (body) {
+		// Capture the response body, ensure it's a valid JSON string
+		res._responseBody = typeof body === 'object' ? JSON.stringify(body, null, 2) : body;
+		return oldSend.apply(res, arguments); // Call the original send function
+	};
 
-  next();
+	next();
 });
 
 // Logging middleware setup with custom format
 app.use(morgan(function (tokens, req, res) {
-  const firstString = [
-    `+ [${tokens.timestamp(req, res)}]`,
-    ` - IP [${tokens['remote-addr'](req, res)}]`,
-    tokens.method(req, res),
-    tokens.url(req, res),
-    tokens.status(req, res),
-    '-',
-    '(' + tokens['response-time'](req, res), 'ms)'
-  ].join(' ');
+	const firstString = [
+		`+ [${tokens.timestamp(req, res)}]`,
+		` - IP [${tokens['remote-addr'](req, res)}]`,
+		tokens.method(req, res),
+		tokens.url(req, res),
+		tokens.status(req, res),
+		'-',
+		'(' + tokens['response-time'](req, res), 'ms)'
+	].join(' ');
 
-  const separator = '='.repeat(firstString.length + 4);
+	const separator = '='.repeat(firstString.length + 4);
 
-  return [
-    `${separator} \n`,
-    firstString,
-    '\n\nRequest Headers:',
-    tokens['request-headers'](req, res), // This will print the request headers in formatted JSON
-    '\n\nRequest Body:',
-    tokens['request-body'](req, res),    // This will print the request body in formatted JSON
-    '\n\nResponse Body:',
-    tokens['response-body'](req, res),   // This will print the response body in formatted JSON
-    "\n",
-  ].join(' ');
+	return [
+		`${separator} \n`,
+		firstString,
+		'\n\nRequest Headers:',
+		tokens['request-headers'](req, res), // This will print the request headers in formatted JSON
+		'\n\nRequest Body:',
+		tokens['request-body'](req, res),    // This will print the request body in formatted JSON
+		'\n\nResponse Body:',
+		tokens['response-body'](req, res),   // This will print the response body in formatted JSON
+		"\n",
+	].join(' ');
 }));
 
 app.use(cors());
@@ -93,14 +93,17 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.get('/', async (req, res) => {
-  res.send("this is the bookmark api");
+	res.send("this is the bookmark api");
 });
 
 // Requiring routers
 const loginRouter = require('./routes/auth/login.js');
 const signUpRouter = require('./routes/auth/sign-up.js');
 const userContentAddRouter = require('./routes/user_content/add.js');
-const content = require('./routes/content/get.js');
+const contentGet = require('./routes/content/get.js');
+const contentAdd = require('./routes/content/add.js');
+const userContentGet = require('./routes/user_content/get.js');
+const userContentAdd = require('./routes/user_content/add.js');
 
 // Instantiating routes
 app.use('/auth/login', loginRouter);
@@ -109,9 +112,12 @@ app.use('/auth/sign-up', signUpRouter);
 // These routes will need an auth token
 app.use(isAuthenticated);
 app.use('/user', userContentAddRouter);
-app.use('/content', content);
+app.use('/content', contentGet, contentAdd);
+app.use('/user_content', userContentGet, userContentAdd);
 
 // Start the server
 app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+  	console.log(`Server is running at http://localhost:${port}`);
 });
+
+module.exports = app;
