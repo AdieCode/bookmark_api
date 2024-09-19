@@ -23,7 +23,7 @@ router.post('/add_manga_content', async (req, res) => {
         })
         
     } catch (error) {
-        console.error('Error occurred :', error);
+        console.error('Error occurred /add_manga_content:', error);
         return res.status(500).json({success: false, message: 'Internal server error' });
     }
 });
@@ -49,7 +49,7 @@ router.post('/add_anime_content', async (req, res) => {
         })
         
     } catch (error) {
-        console.error('Error occurred :', error);
+        console.error('Error occurred /add_anime_content:', error);
         return res.status(500).json({success: false, message: 'Internal server error' });
     }
 });

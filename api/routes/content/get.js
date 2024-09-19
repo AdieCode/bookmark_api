@@ -10,7 +10,7 @@ router.get('/get_manga_content', async (req, res) => {
 		const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
 		res.json(results); 
     } catch (error) {
-		console.error('Error occurred in /get_content:', error);
+		console.error('Error occurred in /get_manga_content:', error);
 		res.status(500).send('Error occurred: ' + error.message);
     }
 });
@@ -23,7 +23,7 @@ router.get('/get_manga_content_specific', async (req, res) => {
 		const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
 		res.json(results); 
 	} catch (error) {
-		console.error('Error occurred :', error);
+		console.error('Error occurred /get_manga_content_specific:', error);
 		res.status(500).send('Error occurred: ' + error.message);
 	}
 });
@@ -35,7 +35,7 @@ router.get('/get_anime_content', async (req, res) => {
 		const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
 		res.json(results); 
 	} catch (error) {
-		console.error('Error occurred in /get_content:', error);
+		console.error('Error occurred in /get_anime_content:', error);
 		res.status(500).send('Error occurred: ' + error.message);
 	}
 });

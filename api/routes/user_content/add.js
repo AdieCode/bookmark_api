@@ -14,7 +14,7 @@ router.post('/add_user_manga_content', async (req, res) => {
     try {
         addData.addUserReadableContent(user_id, content_id, vol, chap, personal_score, content_status, (error, response) => {
             if (error) {
-                console.error('Error occurred :', error);
+                console.error('Error occurred /add_user_manga_content:', error);
                 return res.status(500).json({success: false, message: 'Internal server error' });
             }
 
@@ -41,7 +41,7 @@ router.post('/add_user_anime_content', async (req, res) => {
     try {
         addData.addUserWatchableContent(user_id, content_id, current_season, current_episode, personal_score, content_status, (error, response) => {
             if (error) {
-                console.error('Error occurred :', error);
+                console.error('Error occurred /add_user_anime_content:', error);
                 return res.status(500).json({success: false, message: 'Internal server error' });
             }
 
