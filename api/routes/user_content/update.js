@@ -4,13 +4,13 @@ const updateData = require('../../data/update.js');
 require('dotenv').config(); 
 
 router.post('/update_user_manga_content', (req, res, next) => {
-    const id = req.body.id || null;
+    const user_id = req.body.user_id || null;
     const content_id = req.body.content_id || null;
     const fields = req.body.fields || null;
 
     try {
-        if (id) {
-            updateData.updateReadableContentFieldsById(id, fields, (error, response) => {
+        if (user_id) {
+            updateData.updateUserReadableContentFieldsById(user_id, fields, (error, response) => {
                 if (error) {
                     console.error(`Error at route /update_user_manga_content:`, error);
                     return res.status(500).json({ error: 'Internal server error: ' + error });
@@ -21,7 +21,7 @@ router.post('/update_user_manga_content', (req, res, next) => {
                 }
             });
         } else if (content_id) {
-            updateData.updateReadableContentFieldsByContentId(content_id, fields, (error, response) => {
+            updateData.updateUserReadableContentFieldsByContentId(content_id, fields, (error, response) => {
                 if (error) {
                     console.error(`Error at route /update_user_manga_content:`, error);
                     return res.status(500).json({ error: 'Internal server error: ' + error });
@@ -32,8 +32,8 @@ router.post('/update_user_manga_content', (req, res, next) => {
                 }
             });
         } else {
-            console.error(`Error at route /update_user_manga_content: No id or content_id provided`);
-            return res.status(400).json({ error: 'Missing id or content_id' });
+            console.error(`Error at route /update_user_manga_content: No user_id or content_id provided`);
+            return res.status(400).json({ error: 'Missing user_id or content_id' });
         }
     } catch (error) {
         console.error(`Error at route /update_user_manga_content:`, error);
@@ -42,13 +42,13 @@ router.post('/update_user_manga_content', (req, res, next) => {
 });
 
 router.post('/update_user_anime_content', (req, res, next) => {
-    const id = req.body.id || null;
+    const user_id = req.body.user_id || null;
     const content_id = req.body.content_id || null;
     const fields = req.body.fields || null;
 
     try {
-        if (id) {
-            updateData.updateWatchableContentFieldsById(id, fields, (error, response) => {
+        if (user_id) {
+            updateData.updateUserWatchableContentFieldsById(user_id, fields, (error, response) => {
                 if (error) {
                     console.error(`Error at route /update_user_anime_content:`, error);
                     return res.status(500).json({ error: 'Internal server error: ' + error });
@@ -59,7 +59,7 @@ router.post('/update_user_anime_content', (req, res, next) => {
                 }
             });
         } else if (content_id) {
-            updateData.updateWatchableContentFieldsByContentId(content_id, fields, (error, response) => {
+            updateData.updateUserWatchableContentFieldsByContentId(content_id, fields, (error, response) => {
                 if (error) {
                     console.error(`Error at route /update_user_anime_content:`, error);
                     return res.status(500).json({ error: 'Internal server error: ' + error });
@@ -70,8 +70,8 @@ router.post('/update_user_anime_content', (req, res, next) => {
                 }
             });
         } else {
-            console.error(`Error at route /update_user_anime_content: No id or content_id provided`);
-            return res.status(400).json({ error: 'Missing id or content_id' });
+            console.error(`Error at route /update_user_anime_content: No user_id or content_id provided`);
+            return res.status(400).json({ error: 'Missing user_id or content_id' });
         }
     } catch (error) {
         console.error(`Error at route /update_user_anime_content:`, error);

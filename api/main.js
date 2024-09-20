@@ -7,9 +7,7 @@ const morgan = require('morgan');
 // external packages
 require('dotenv').config();
 
-// internal packages
-const getManga = require("./utils/aniList.js");
-const { isAuthenticated } = require('./utils/auth.js');
+const { isAuthenticated, googleOAuth, githubOAuth } = require('./utils/auth.js');
 const port = process.env.PORT || 3000;
 
 // Utility function to mask password fields
@@ -102,18 +100,26 @@ const signUpRouter = require('./routes/auth/sign-up.js');
 const userContentAddRouter = require('./routes/user_content/add.js');
 const contentGet = require('./routes/content/get.js');
 const contentAdd = require('./routes/content/add.js');
+const contentUpdate = require('./routes/content/update.js');
 const userContentGet = require('./routes/user_content/get.js');
 const userContentAdd = require('./routes/user_content/add.js');
+const userContentUpdate = require('./routes/user_content/update.js');
 
 // Instantiating routes
 app.use('/auth/login', loginRouter);
 app.use('/auth/sign-up', signUpRouter);
 
+// Google OAuth route
+app.get('/auth/google/callback', googleOAuth);
+
+// GitHub OAuth route
+app.get('/auth/github/callback', githubOAuth);
+
 // These routes will need an auth token
 app.use(isAuthenticated);
 app.use('/user', userContentAddRouter);
-app.use('/content', contentGet, contentAdd);
-app.use('/user_content', userContentGet, userContentAdd);
+app.use('/content', contentGet, contentAdd, contentUpdate);
+app.use('/user_content', userContentGet, userContentAdd, userContentUpdate);
 
 // Start the server
 app.listen(port, () => {

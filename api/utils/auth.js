@@ -1,7 +1,17 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config(); 
-const secret = process.env.JWT_KEY; // Use the same secret key used in your JWT creation
+
+const secret = process.env.JWT_KEY; // JWT secret
+
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI; // Google OAuth callback
+
+// GitHub OAuth client details
+const githubClientId = process.env.GITHUB_CLIENT_ID;
+const githubClientSecret = process.env.GITHUB_CLIENT_SECRET;
+const githubRedirectUri = process.env.GITHUB_REDIRECT_URI; // This should match what you set in GitHub OAuth settings
 
 async function hashPassword(password) {
     try {
@@ -56,4 +66,121 @@ const isAuthenticated = (req, res, next) => {
     }
 };
 
-module.exports = { hashPassword, checkPassword, isAuthenticated };
+// Google OAuth flow
+const googleOAuth = async (req, res) => {
+    const code = req.query.code;
+    
+    if (!code) {
+        return res.status(400).json({ error: 'Code not provided' });
+    }
+
+    try {
+        // Exchange the code for an access token
+        const tokenResponse = await axios.post(
+            'https://oauth2.googleapis.com/token',
+            {
+                client_id: googleClientId,
+                client_secret: googleClientSecret,
+                code: code,
+                grant_type: 'authorization_code',
+                redirect_uri: googleRedirectUri,
+            }
+        );
+
+        const { access_token, id_token } = tokenResponse.data;
+
+        if (!access_token || !id_token) {
+            return res.status(400).json({ error: 'Unable to authenticate with Google' });
+        }
+
+        // Use the id_token to get user details from Google
+        const userResponse = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: {
+                Authorization: `Bearer ${id_token}`,
+            },
+        });
+
+        const googleUser = userResponse.data;
+
+        // Check if the user exists in your database, if not, create them
+        const user = {
+            googleId: googleUser.sub,
+            email: googleUser.email,
+            username: googleUser.name,
+        };
+
+        // Generate JWT for authenticated user
+        const token = jwt.sign(user, secret, { expiresIn: '7d' });
+
+        // Redirect user to front-end with the token (optional)
+        res.redirect(`${process.env.FRONTEND_URL}/?token=${token}`);
+
+    } catch (error) {
+        console.error('Google OAuth error:', error);
+        res.status(500).json({ error: 'Failed to authenticate with Google' });
+    }
+};
+
+
+// GitHub OAuth flow
+const githubOAuth = async (req, res) => {
+    const code = req.query.code;
+    
+    if (!code) {
+        return res.status(400).json({ error: 'Code not provided' });
+    }
+
+    try {
+        // Exchange the code for an access token
+        const tokenResponse = await axios.post(
+            'https://github.com/login/oauth/access_token',
+            {
+                client_id: githubClientId,
+                client_secret: githubClientSecret,
+                code: code,
+                redirect_uri: githubRedirectUri,
+            },
+            {
+                headers: {
+                    accept: 'application/json',
+                },
+            }
+        );
+        
+        const accessToken = tokenResponse.data.access_token;
+
+        if (!accessToken) {
+            return res.status(400).json({ error: 'Unable to authenticate with GitHub' });
+        }
+
+        // Use the access token to get user details from GitHub
+        const userResponse = await axios.get('https://api.github.com/user', {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+
+        const githubUser = userResponse.data;
+        
+        // Here you can check if the user exists in your database, if not, create them
+        // You should fetch the user by their GitHub ID or GitHub email
+        // For simplicity, let's assume you return or create a user
+        const user = {
+            githubId: githubUser.id,
+            email: githubUser.email || `${githubUser.id}@github.com`,
+            username: githubUser.login,
+        };
+
+        // Generate JWT for authenticated user
+        const token = jwt.sign(user, secret, { expiresIn: '7d' });
+
+        // Redirect user to front-end with the token (optional)
+        res.redirect(`${process.env.FRONTEND_URL}/?token=${token}`);
+
+    } catch (error) {
+        console.error('GitHub OAuth error:', error);
+        res.status(500).json({ error: 'Failed to authenticate with GitHub' });
+    }
+};
+
+module.exports = { hashPassword, checkPassword, isAuthenticated, googleOAuth, githubOAuth};

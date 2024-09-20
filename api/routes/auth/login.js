@@ -21,7 +21,7 @@ router.post('/', (req, res, next) => {
         if (response) {
             // Credentials are correct
             const user = { email: email }; // You can add more user info here
-            const token = jwt.sign(user, secret, { expiresIn: '4h' });
+            const token = jwt.sign(user, secret, { expiresIn: '7d' });
             return res.status(200).json({ message: 'Login successful', token: token });
         } else {
             // Credentials are incorrect
