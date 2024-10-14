@@ -108,6 +108,9 @@ const userContentUpdate = require('./routes/user_content/update.js');
 // Instantiating routes
 app.use('/auth/login', loginRouter);
 app.use('/auth/sign-up', signUpRouter);
+app.get('/isAuth', isAuthenticated, (req, res, next) => {
+	res.send({message:"logged in"});
+})
 
 // Google OAuth route
 app.get('/auth/google/callback', googleOAuth);
@@ -116,7 +119,8 @@ app.get('/auth/google/callback', googleOAuth);
 app.get('/auth/github/callback', githubOAuth);
 
 // These routes will need an auth token
-app.use(isAuthenticated);
+// app.use(isAuthenticated);
+
 app.use('/user', userContentAddRouter);
 app.use('/content', contentGet, contentAdd, contentUpdate);
 app.use('/user_content', userContentGet, userContentAdd, userContentUpdate);

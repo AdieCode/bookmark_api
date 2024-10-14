@@ -34,31 +34,42 @@ const enrich = {
         if (!mangaData || !mangaData.data || !mangaData.data.Page || !Array.isArray(mangaData.data.Page.media)) {
             throw new Error('Invalid mangaData format');
         }
-
-        const formatedData =  mangaData.data.Page.media.map(media => ({
-            anilist_content_id: media.id,
-            title: media.title.romaji || media.title.english || media.title.native,
-            genres: media.genres,
-            description: media.description || '',
-            cover_image_url: media.coverImage.extraLarge,
-            release_date: new Date(), // Default or actual release date if available
-            type: media.type.toLowerCase(), // Ensure type matches the database format
-            average_score: media.averageScore || null,
-            volumes: media.volumes || 0,
-            chapters: media.chapters || 0
-        }));
-
-        return formatedData;
-    },
-
-    convertToSendBackFormat: function(pageData, media) {
-        const results = {
-            data: {
-                page: pageData,
-                media
-            }
+    
+        try {
+            const formattedData = mangaData.data.Page.media.map(media => ({
+                anilist_content_id: media.id,
+                title: media.title,
+                genres: media.genres,
+                description: media.description || '',
+                cover_image_url: media.coverImage.extraLarge,
+                release_date: new Date(), // Default or actual release date if available
+                type: media.type, // Ensure type matches the database format
+                average_score: media.averageScore || null,
+                volumes: media.volumes || 0,
+                chapters: media.chapters || 0,
+                isAdult: media.isAdult,
+            }));
+    
+            return formattedData;
+        } catch (error) {
+            throw new Error('Error formatting mangaData: ' + error.message);
         }
-        return results
+    },
+    
+    convertToSendBackFormat: function(pageData, media) {
+        try {
+            const results = {
+                data: {
+                    page: pageData,
+                    media
+                }
+            }
+            return results
+
+        } catch (error) {
+            return error
+            console.error('Error occurred:', error);
+        }
     }
 }
 module.exports = enrich;

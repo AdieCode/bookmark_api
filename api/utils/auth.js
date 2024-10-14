@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
+const qs = require('querystring');
 require('dotenv').config(); 
 
 const secret = process.env.JWT_KEY; // JWT secret
@@ -54,8 +56,10 @@ const isAuthenticated = (req, res, next) => {
     
         jwt.verify(token, secret, (err, decoded) => {
             if (err) {
+                console.error(err)
                 return res.status(401).json({ auth: false, error: 'Unauthorized, you are not authorized to access this endpoint' });
             }
+            console.error(decoded)
             req.user = decoded;
             next();
         });
@@ -78,12 +82,17 @@ const googleOAuth = async (req, res) => {
         // Exchange the code for an access token
         const tokenResponse = await axios.post(
             'https://oauth2.googleapis.com/token',
-            {
+            qs.stringify({
                 client_id: googleClientId,
                 client_secret: googleClientSecret,
                 code: code,
                 grant_type: 'authorization_code',
                 redirect_uri: googleRedirectUri,
+            }),
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
             }
         );
 
@@ -96,7 +105,7 @@ const googleOAuth = async (req, res) => {
         // Use the id_token to get user details from Google
         const userResponse = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
             headers: {
-                Authorization: `Bearer ${id_token}`,
+                Authorization: `Bearer ${access_token}`,
             },
         });
 
@@ -104,6 +113,7 @@ const googleOAuth = async (req, res) => {
 
         // Check if the user exists in your database, if not, create them
         const user = {
+            Oauth: true,
             googleId: googleUser.sub,
             email: googleUser.email,
             username: googleUser.name,
@@ -113,10 +123,10 @@ const googleOAuth = async (req, res) => {
         const token = jwt.sign(user, secret, { expiresIn: '7d' });
 
         // Redirect user to front-end with the token (optional)
-        res.redirect(`${process.env.FRONTEND_URL}/?token=${token}`);
+        res.redirect(`${process.env.FRONTEND_URL}/google/callback?token=${token}`);
 
     } catch (error) {
-        console.error('Google OAuth error:', error);
+        console.error('Google OAuth error:', error.response?.data || error.message);
         res.status(500).json({ error: 'Failed to authenticate with Google' });
     }
 };
@@ -175,10 +185,10 @@ const githubOAuth = async (req, res) => {
         const token = jwt.sign(user, secret, { expiresIn: '7d' });
 
         // Redirect user to front-end with the token (optional)
-        res.redirect(`${process.env.FRONTEND_URL}/?token=${token}`);
+        res.redirect(`${process.env.FRONTEND_URL}/github/callback?token=${token}`);
 
     } catch (error) {
-        console.error('GitHub OAuth error:', error);
+        console.error('GitHub OAuth error:', error.response?.data || error.message);
         res.status(500).json({ error: 'Failed to authenticate with GitHub' });
     }
 };

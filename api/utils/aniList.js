@@ -1,32 +1,33 @@
 var query = `
 query ($id: Int, $page: Int, $perPage: Int, $search: String, $type: MediaType, $sort: [MediaSort]) {
-  Page(page: $page, perPage: $perPage) {
-    pageInfo {
-      total
-      currentPage
-      lastPage
-      hasNextPage
-      perPage
+    Page(page: $page, perPage: $perPage) {
+        pageInfo {
+            total
+            currentPage
+            lastPage
+            hasNextPage
+            perPage
+        }
+        media(id: $id, search: $search, type: $type, sort: $sort) {
+            id
+            title {
+                romaji
+                english
+                native
+            }
+            genres 
+            description
+            type
+            coverImage {
+                extraLarge  
+            }
+            status
+            averageScore
+            volumes
+            chapters
+            isAdult
+        }
     }
-    media(id: $id, search: $search, type: $type, sort: $sort) {
-      id
-      title {
-        romaji
-        english
-        native
-      }
-      genres 
-      description
-      type
-      coverImage {
-        extraLarge  
-      }
-      status
-      averageScore
-      volumes
-      chapters
-    }
-  }
 }
 `;
 
@@ -82,6 +83,7 @@ const getContentFromAnilist = async (type = null, searchTerm = null, page = 1, p
         const data = await handleResponse(response);
         return handleData(data);
     } catch (error) {
+        return{}
         handleError(error);
     }
 };
