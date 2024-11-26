@@ -13,7 +13,7 @@ const enrich = {
                     itemData.title = itemData.title || enrichedData.title.romaji;
                     itemData.genres = itemData.genres;
                     itemData.description = itemData.description || enrichedData.description;
-                    itemData.cover_image_url = itemData.cover_image_url || enrichedData.coverImage.extraLarge;
+                    itemData.cover_image_url = itemData.cover_image_url || enrichedData.coverImage.extraLarge || enrichedData.coverImage.large;
                     itemData.type = itemData.type || enrichedData.type;
                     itemData.average_score = itemData.average_score || enrichedData.averageScore;
                     itemData.reading_status = itemData.reading_status || "Planning to read"
@@ -30,10 +30,35 @@ const enrich = {
         return enrichedDataResults;
     },
 
+    convertRecommendationsToStanderdContentFormat: function (content) {
+        if (!content || !Array.isArray(content)) {
+            throw new Error('Invalid content format');
+        };
+    
+        try {
+            const formattedData = content.map(media => {
+                const recommendation = media.node.mediaRecommendation; // Access the mediaRecommendation node
+                return {
+                    anilist_content_id: recommendation.id,
+                    title: recommendation.title || 'No Title',
+                    genres: recommendation.genres || [],
+                    cover_image_url: recommendation.coverImage?.extraLarge || recommendation.coverImage?.large || 'No Image',
+                    type: recommendation.type || 'No Type', // Ensure type matches the database format
+                    average_score: recommendation.averageScore || null,
+                    isAdult: recommendation.isAdult || false,
+                    status: recommendation.status || 'no status',
+                };
+            });
+            return formattedData;
+        } catch (error) {
+            throw new Error('Error formatting recommendations: ' + error.message);
+        }
+    },
+
     convertToStanderdContentFormat: function (mangaData) {
         if (!mangaData || !mangaData.data || !mangaData.data.Page || !Array.isArray(mangaData.data.Page.media)) {
             throw new Error('Invalid mangaData format');
-        }
+        };
     
         try {
             const formattedData = mangaData.data.Page.media.map(media => ({
@@ -41,13 +66,16 @@ const enrich = {
                 title: media.title,
                 genres: media.genres,
                 description: media.description || '',
-                cover_image_url: media.coverImage.extraLarge,
+                cover_image_url: media.coverImage.extraLarge || media.coverImage.large,
                 release_date: new Date(), // Default or actual release date if available
                 type: media.type, // Ensure type matches the database format
                 average_score: media.averageScore || null,
                 volumes: media.volumes || 0,
                 chapters: media.chapters || 0,
                 isAdult: media.isAdult,
+                status: media.status || 'no status',
+                relations: media.relations || 'no relations',
+                recommendations: media.recommendations ? this.convertRecommendationsToStanderdContentFormat(media.recommendations.edges) : 'no recommendations'
             }));
     
             return formattedData;
@@ -55,7 +83,7 @@ const enrich = {
             throw new Error('Error formatting mangaData: ' + error.message);
         }
     },
-    
+
     convertToSendBackFormat: function(pageData, media) {
         try {
             const results = {

@@ -115,7 +115,7 @@ const googleOAuth = async (req, res) => {
         const user = {
             Oauth: true,
             googleId: googleUser.sub,
-            email: googleUser.email,
+            email: googleUser.email, 
             username: googleUser.name,
         };
 
