@@ -35,11 +35,16 @@ query ($id: Int) {
                             romaji
                             english
                         }
+                        genres 
+                        description
+                        type
                         coverImage {
                             extraLarge
                         }
-                        type
+                        volumes
+                        chapters
                         status
+                        averageScore
                         isAdult
                     }
                 }
@@ -54,15 +59,33 @@ query ($id: Int) {
                                 romaji
                                 english
                             }
+                            genres 
+                            description
+                            type
                             coverImage {
                                 extraLarge
                             }
-                            type
+                            volumes
+                            chapters
                             status
                             averageScore
                             isAdult
                         }
                         rating
+                    }
+                }
+            }
+            characters {
+                edges {
+                    role
+                    node {
+                        id
+                        name {
+                            full
+                        }
+                        image {
+                            large
+                        }
                     }
                 }
             }
@@ -122,6 +145,7 @@ const getContentFromAnilistById = async (id) => {
             })
         });
         const data = await handleResponse(response);
+        console.log('12345:\n',JSON.stringify(data))
         return handleData(data);
     } catch (error) {
         handleError(error);

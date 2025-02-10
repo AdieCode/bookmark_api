@@ -125,6 +125,16 @@ app.use('/user', userContentAddRouter);
 app.use('/content', contentGet, contentAdd, contentUpdate);
 app.use('/user_content', userContentGet, userContentAdd, userContentUpdate);
 
+// Error-handling middleware
+app.use((err, req, res, next) => {
+	console.error(err.stack); // Log the error stack trace for debugging
+	res.status(err.status || 500).json({
+	  error: {
+		message: err.message || 'Internal Server Error',
+	  },
+	});
+  });
+  
 // Start the server
 app.listen(port, () => {
   	console.log(`Server is running at http://localhost:${port}`);

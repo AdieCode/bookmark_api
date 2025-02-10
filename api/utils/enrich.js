@@ -30,6 +30,35 @@ const enrich = {
         return enrichedDataResults;
     },
 
+    convertRelationsToStanderdContentFormat: function (content) {
+        if (!content || !Array.isArray(content)) {
+            throw new Error('Invalid content format');
+        };
+
+        try {
+            const formattedData = content.map(media => {
+                const relations = media.node; // Access the mediaRecommendation node
+                return {
+                    anilist_content_id: relations.id,
+                    title: relations.title || 'No Title',
+                    genres: relations.genres || [],
+                    description: relations.description || '',
+                    cover_image_url: relations.coverImage?.extraLarge || relations.coverImage?.large || 'No Image',
+                    type: relations.type || 'No Type', // Ensure type matches the database format
+                    average_score: relations.averageScore || null,
+                    volumes: relations.volumes || 0,
+                    chapters: relations.chapters || 0,
+                    isAdult: relations.isAdult || false,
+                    status: relations.status || 'no status',
+                    relationType: media.relationType || 'no relationType',
+                };
+            });
+            return formattedData;
+        } catch (error) {
+            throw new Error('Error formatting relations: ' + error.message);
+        }
+    },
+
     convertRecommendationsToStanderdContentFormat: function (content) {
         if (!content || !Array.isArray(content)) {
             throw new Error('Invalid content format');
@@ -42,9 +71,12 @@ const enrich = {
                     anilist_content_id: recommendation.id,
                     title: recommendation.title || 'No Title',
                     genres: recommendation.genres || [],
+                    description: recommendation.description || '',
                     cover_image_url: recommendation.coverImage?.extraLarge || recommendation.coverImage?.large || 'No Image',
                     type: recommendation.type || 'No Type', // Ensure type matches the database format
                     average_score: recommendation.averageScore || null,
+                    volumes: recommendation.volumes || 0,
+                    chapters: recommendation.chapters || 0,
                     isAdult: recommendation.isAdult || false,
                     status: recommendation.status || 'no status',
                 };
@@ -55,7 +87,30 @@ const enrich = {
         }
     },
 
+
+    convertCharactersToStanderdContentFormat: function (content) {
+        if (!content || !Array.isArray(content)) {
+            throw new Error('Invalid content format');
+        }
+
+        try {
+            const formattedData = content.map(media => {
+                const character = media.node; // Access the mediaRecommendation node
+                return {
+                    character_content_id: character.id,
+                    name: character.name.full || 'No name',
+                    role: media.role || "no role",
+                    character_image_url: character.image.large
+                };
+            });
+            return formattedData;
+        } catch (error) {
+            throw new Error('Error formatting recommendations: ' + error.message);
+        }
+    },
+
     convertToStanderdContentFormat: function (mangaData) {
+
         if (!mangaData || !mangaData.data || !mangaData.data.Page || !Array.isArray(mangaData.data.Page.media)) {
             throw new Error('Invalid mangaData format');
         };
@@ -74,8 +129,9 @@ const enrich = {
                 chapters: media.chapters || 0,
                 isAdult: media.isAdult,
                 status: media.status || 'no status',
-                relations: media.relations || 'no relations',
-                recommendations: media.recommendations ? this.convertRecommendationsToStanderdContentFormat(media.recommendations.edges) : 'no recommendations'
+                relations: media.relations ? this.convertRelationsToStanderdContentFormat(media.relations.edges) : 'no relations found',
+                recommendations: media.recommendations ? this.convertRecommendationsToStanderdContentFormat(media.recommendations.edges) : 'no recommendations',
+                characters: media.characters ? this.convertCharactersToStanderdContentFormat(media.characters.edges) : 'no characters found'
             }));
     
             return formattedData;

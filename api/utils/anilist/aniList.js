@@ -75,6 +75,11 @@ const getContentFromAnilist = async (type = null, searchTerm = null, page = 1, p
         // Merge the query with the updated variables
         const response = await fetch(url, {
             ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Cache-Control': 'no-cache' // Prevent cached responses
+            },
             body: JSON.stringify({
                 query: query,
                 variables: variables
