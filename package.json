@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node api/main.js",
     "dev": "nodemon api/main.js",
     "test": "mocha --require @babel/register 'tests/**/*.test.cjs'"
   },
