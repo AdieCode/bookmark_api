@@ -48,6 +48,7 @@ const enrich = {
                     average_score: relations.averageScore || null,
                     volumes: relations.volumes || 0,
                     chapters: relations.chapters || 0,
+                    episodes: relations.episodes || 0,
                     isAdult: relations.isAdult || false,
                     status: relations.status || 'no status',
                     relationType: media.relationType || 'no relationType',
@@ -77,6 +78,7 @@ const enrich = {
                     average_score: recommendation.averageScore || null,
                     volumes: recommendation.volumes || 0,
                     chapters: recommendation.chapters || 0,
+                    episodes: recommendation.episodes || 0,
                     isAdult: recommendation.isAdult || false,
                     status: recommendation.status || 'no status',
                 };
@@ -127,6 +129,7 @@ const enrich = {
                 average_score: media.averageScore || null,
                 volumes: media.volumes || 0,
                 chapters: media.chapters || 0,
+                episodes: media.episodes || 0,
                 isAdult: media.isAdult,
                 status: media.status || 'no status',
                 relations: media.relations ? this.convertRelationsToStanderdContentFormat(media.relations.edges) : 'no relations found',

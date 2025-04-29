@@ -43,6 +43,7 @@ query ($id: Int) {
                         }
                         volumes
                         chapters
+                        episodes
                         status
                         averageScore
                         isAdult
@@ -67,6 +68,7 @@ query ($id: Int) {
                             }
                             volumes
                             chapters
+                            episodes
                             status
                             averageScore
                             isAdult

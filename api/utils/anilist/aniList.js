@@ -25,6 +25,7 @@ query ($id: Int, $page: Int, $perPage: Int, $search: String, $type: MediaType, $
             averageScore
             volumes
             chapters
+            episodes
             isAdult
         }
     }
