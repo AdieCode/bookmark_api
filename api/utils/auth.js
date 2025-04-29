@@ -77,6 +77,7 @@ const googleOAuth = async (req, res) => {
     if (!code) {
         return res.status(400).json({ error: 'Code not provided' });
     }
+    console.log('the redirect_uri about to be used ==> ', googleRedirectUri)
 
     try {
         // Exchange the code for an access token
