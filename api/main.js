@@ -137,6 +137,7 @@ app.use((err, req, res, next) => {
   
 // Start the server
 app.listen(port, () => {
+	console.log(`Google redirect uri ${process.env.GOOGLE_REDIRECT_URI || 'not set'}`);
   	console.log(`Server is running at http://localhost:${port}`);
 });
 
