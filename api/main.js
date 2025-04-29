@@ -91,7 +91,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.get('/', async (req, res) => {
-	res.send("this is the bookmark api");
+	res.send({message: "this is the bookmark api"});
 });
 
 // Requiring routers
