@@ -4,7 +4,7 @@ const {
     handleError 
 } = require("../responseHandlers.js");
 
-const query = global.config.aniList.query.getContent; 
+const query = global.config.aniList.query.getContentByFilters; 
 const url =   global.config.aniList.baseUrl; 
 const options = {
     method: 'POST',

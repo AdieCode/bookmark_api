@@ -3,11 +3,12 @@ const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
+global.config = Object.freeze(require('./utils/configLoader/configLoader')());
 
 // external packages
 require('dotenv').config();
 
-const { isAuthenticated, googleOAuth, githubOAuth } = require('./utils/auth.js');
+const { isAuthenticated, googleOAuth, githubOAuth } = require('./utils/Oauth/auth.js');
 const port = process.env.PORT || 3000;
 
 // Utility function to mask password fields
@@ -119,7 +120,7 @@ app.get('/auth/google/callback', googleOAuth);
 app.get('/auth/github/callback', githubOAuth);
 
 // These routes will need an auth token
-// app.use(isAuthenticated);
+app.use(isAuthenticated);
 
 app.use('/user', userContentAddRouter);
 app.use('/content', contentGet, contentAdd, contentUpdate);
@@ -137,7 +138,6 @@ app.use((err, req, res, next) => {
   
 // Start the server
 app.listen(port, () => {
-	console.log(`Google redirect uri ${process.env.GOOGLE_REDIRECT_URI || 'not set'}`);
   	console.log(`Server is running at http://localhost:${port}`);
 });
 

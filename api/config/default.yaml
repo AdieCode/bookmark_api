@@ -1,0 +1,191 @@
+aniList:
+    baseUrl: https://graphql.anilist.co
+    query:
+        getContent: |
+            query ($id: Int, $page: Int, $perPage: Int, $search: String, $type: MediaType, $sort: [MediaSort]) {
+                Page(page: $page, perPage: $perPage) {
+                    pageInfo {
+                        total
+                        currentPage
+                        lastPage
+                        hasNextPage
+                        perPage
+                    }
+                    media(id: $id, search: $search, type: $type, sort: $sort) {
+                        id
+                        title {
+                            romaji
+                            english
+                            native
+                        }
+                        genres 
+                        description
+                        type
+                        coverImage { 
+                            large 
+                        }
+                        status
+                        averageScore
+                        volumes
+                        chapters
+                        episodes
+                        isAdult
+                    }
+                }
+            }
+        getContentById: |
+            query ($id: Int) {
+                Page {
+                    pageInfo {
+                        total
+                        currentPage
+                        lastPage
+                        hasNextPage
+                        perPage
+                    }
+                    media(id: $id) {
+                        id
+                        title {
+                            romaji
+                            english
+                            native
+                        }
+                        genres 
+                        description
+                        type
+                        coverImage {
+                            extraLarge  
+                        }
+                        status
+                        averageScore
+                        volumes
+                        chapters
+                        isAdult
+                        relations {
+                            edges {
+                                relationType
+                                node {
+                                    id
+                                    title {
+                                        romaji
+                                        english
+                                    }
+                                    genres 
+                                    description
+                                    type
+                                    coverImage {
+                                        extraLarge
+                                    }
+                                    volumes
+                                    chapters
+                                    episodes
+                                    status
+                                    averageScore
+                                    isAdult
+                                }
+                            }
+                        }
+                        recommendations {
+                            edges {
+                                node {
+                                    id
+                                    mediaRecommendation {
+                                        id
+                                        title {
+                                            romaji
+                                            english
+                                        }
+                                        genres 
+                                        description
+                                        type
+                                        coverImage {
+                                            extraLarge
+                                        }
+                                        volumes
+                                        chapters
+                                        episodes
+                                        status
+                                        averageScore
+                                        isAdult
+                                    }
+                                    rating
+                                }
+                            }
+                        }
+                        characters {
+                            edges {
+                                role
+                                node {
+                                    id
+                                    name {
+                                        full
+                                    }
+                                    image {
+                                        large
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        getContentByFilters: |
+            query (
+                $id: Int,
+                $page: Int,
+                $perPage: Int,
+                $search: String,
+                $type: MediaType,
+                $sort: [MediaSort],
+                $genre_in: [String],
+                $status: MediaStatus,
+                $countryOfOrigin_in: [CountryCode],
+                $seasonYear_in: [Int],
+                $format_in: [MediaFormat],
+                $tag_in: [String]
+            ){
+                Page(page: $page, perPage: $perPage) {
+                    pageInfo {
+                    total
+                    currentPage
+                    lastPage
+                    hasNextPage
+                    perPage
+                    }
+                    media(
+                    id: $id,
+                    search: $search,
+                    type: $type,
+                    sort: $sort,
+                    genre_in: $genre_in,
+                    status: $status,
+                    countryOfOrigin_in: $countryOfOrigin_in,
+                    seasonYear_in: $seasonYear_in,
+                    format_in: $format_in,
+                    tag_in: $tag_in
+                    ) {
+                    id
+                    title {
+                        romaji
+                        english
+                        native
+                    }
+                    genres
+                    tags {
+                        name
+                    }
+                    description
+                    type
+                    format
+                    coverImage {
+                        large
+                    }
+                    status
+                    averageScore
+                    volumes
+                    chapters
+                    episodes
+                    isAdult
+                    }
+                }
+            }

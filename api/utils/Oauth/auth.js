@@ -43,10 +43,10 @@ async function checkPassword(inputPassword, hashedPassword) {
 
 const isAuthenticated = (req, res, next) => {
     try {
-        const authHeader = req.headers.authorization;
+        const authHeader = req?.headers?.authorization;
         
         if(!authHeader){
-            throw new Error("No token provided");
+            return res.status(401).json({ auth: false, error: 'Token not provided' });
             
         } else if(!authHeader.startsWith('Bearer ')) {
             return res.status(401).json({ auth: false, error: 'invalid token provided, Bearer is missing ' });
@@ -77,7 +77,6 @@ const googleOAuth = async (req, res) => {
     if (!code) {
         return res.status(400).json({ error: 'Code not provided' });
     }
-    console.log('the redirect_uri about to be used ==> ', googleRedirectUri)
 
     try {
         // Exchange the code for an access token

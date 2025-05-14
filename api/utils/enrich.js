@@ -1,6 +1,5 @@
 const enrich = {
     enrichReadableContentData: function(currentData, neededData) {
-    // Extract media data from neededData
     const mediaData = neededData.data.Page.media;
 
     const enrichedDataResults =  currentData.map(itemData => {
@@ -107,7 +106,7 @@ const enrich = {
             });
             return formattedData;
         } catch (error) {
-            throw new Error('Error formatting recommendations: ' + error.message);
+            throw new Error('Error formatting characters: ' + error.message);
         }
     },
 
