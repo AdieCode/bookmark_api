@@ -68,18 +68,18 @@ const enrich = {
             const formattedData = content.map(media => {
                 const recommendation = media.node.mediaRecommendation; // Access the mediaRecommendation node
                 return {
-                    anilist_content_id: recommendation.id,
-                    title: recommendation.title || 'No Title',
-                    genres: recommendation.genres || [],
-                    description: recommendation.description || '',
-                    cover_image_url: recommendation.coverImage?.extraLarge || recommendation.coverImage?.large || 'No Image',
-                    type: recommendation.type || 'No Type', // Ensure type matches the database format
-                    average_score: recommendation.averageScore || null,
-                    volumes: recommendation.volumes || 0,
-                    chapters: recommendation.chapters || 0,
-                    episodes: recommendation.episodes || 0,
-                    isAdult: recommendation.isAdult || false,
-                    status: recommendation.status || 'no status',
+                    anilist_content_id: recommendation?.id || 'No ID',
+                    title: recommendation?.title || 'No Title',
+                    genres: recommendation?.genres || [],
+                    description: recommendation?.description || '',
+                    cover_image_url: recommendation?.coverImage?.extraLarge || recommendation?.coverImage?.large || 'No Image',
+                    type: recommendation?.type || 'No Type', // Ensure type matches the database format
+                    average_score: recommendation?.averageScore || null,
+                    volumes: recommendation?.volumes || 0,
+                    chapters: recommendation?.chapters || 0,
+                    episodes: recommendation?.episodes || 0,
+                    isAdult: recommendation?.isAdult || false,
+                    status: recommendation?.status || 'no status',
                 };
             });
             return formattedData;
@@ -98,10 +98,10 @@ const enrich = {
             const formattedData = content.map(media => {
                 const character = media.node; // Access the mediaRecommendation node
                 return {
-                    character_content_id: character.id,
-                    name: character.name.full || 'No name',
+                    character_content_id: character?.id,
+                    name: character?.name.full || 'No name',
                     role: media.role || "no role",
-                    character_image_url: character.image.large
+                    character_image_url: character?.image.large
                 };
             });
             return formattedData;
