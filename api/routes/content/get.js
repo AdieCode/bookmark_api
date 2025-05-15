@@ -26,7 +26,7 @@ router.get('/get_manga_content', async (req, res, next) => {
 router.post('/get_manga_content_specific', async (req, res, next) => {
     const search = req.body.search;
     try {
-        let fetcedData = await getContentFromAnilist("MANGA", search, 1, 3);
+        let fetcedData = await getContentFromAnilist("MANGA", search, 1, 5);
         const convertedFecthedResults = enrich.convertToStanderdContentFormat(fetcedData)
         const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
         res.json(results); 
