@@ -16,7 +16,7 @@ const handleAniListData = (data) => {
 };
 
 const handleError = (error) => {
-    console.error('Error occurred:', error);
+    console.log('Error occurred:', error);
 };
 
 module.exports = {

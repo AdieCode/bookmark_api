@@ -189,3 +189,35 @@ aniList:
                     }
                 }
             }
+        getContentBySearch: |
+            query ($page: Int, $perPage: Int, $search: String, $sort: [MediaSort]) {
+                Page(page: $page, perPage: $perPage) {
+                    pageInfo {
+                        total
+                        currentPage
+                        lastPage
+                        hasNextPage
+                        perPage
+                    }
+                    media(search: $search, sort: $sort) {
+                        id
+                        title {
+                            romaji
+                            english
+                            native
+                        }
+                        genres 
+                        description
+                        type
+                        coverImage { 
+                            large 
+                        }
+                        status
+                        averageScore
+                        volumes
+                        chapters
+                        episodes
+                        isAdult
+                    }
+                }
+            }
