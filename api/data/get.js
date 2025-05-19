@@ -49,6 +49,31 @@ const getData = {
         });
     },
 
+    checkIfOAuthUserExists: async function(provider, externalId, callback) {
+        try {
+            let column;
+            if (provider === 'google') {
+                column = 'external_google_id';
+            } else if (provider === 'github') {
+                column = 'external_github_id';
+            } else {
+                return callback(new Error('Invalid provider specified'), null);
+            }
+
+            const sql = `SELECT * FROM users WHERE ${column} = $1 LIMIT 1`;
+            const result = await BookmarkDB.query(sql, [externalId]);
+
+            if (result.rows.length > 0) {
+                callback(null, result.rows[0]); // User exists, return user
+            } else {
+                callback(null, null); // User does not exist
+            }
+        } catch (error) {
+            console.error('Error checking OAuth user:', error);
+            callback(error, null);
+        }
+    },
+
     getUserReadableContent: async function(user_id, callback) {
         try {
             const result = await BookmarkDB.query(

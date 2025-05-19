@@ -4,6 +4,8 @@ const axios = require('axios');
 const qs = require('querystring');
 require('dotenv').config(); 
 
+const idCheck = require('./idCheck.js'); // Import the idCheck module
+
 const secret = process.env.JWT_KEY; // JWT secret
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -59,7 +61,7 @@ const isAuthenticated = (req, res, next) => {
                 console.error(err)
                 return res.status(401).json({ auth: false, error: 'Unauthorized, you are not authorized to access this endpoint' });
             }
-            console.error(decoded)
+            console.log(decoded)
             req.user = decoded;
             next();
         });
@@ -111,12 +113,13 @@ const googleOAuth = async (req, res) => {
 
         const googleUser = userResponse.data;
 
-        // Check if the user exists in your database, if not, create them
+        const userData = await idCheck.checkIfGoogleUserExists(googleUser);
+
         const user = {
             Oauth: true,
-            googleId: googleUser.sub,
-            email: googleUser.email, 
-            username: googleUser.name,
+            id: userData?.id,
+            username: userData?.username,
+            status: 'active'
         };
 
         // Generate JWT for authenticated user
@@ -172,13 +175,13 @@ const githubOAuth = async (req, res) => {
 
         const githubUser = userResponse.data;
         
-        // Here you can check if the user exists in your database, if not, create them
-        // You should fetch the user by their GitHub ID or GitHub email
-        // For simplicity, let's assume you return or create a user
+        const userData = await idCheck.checkIfGithubUserExists(githubUser);
+
         const user = {
-            githubId: githubUser.id,
-            email: githubUser.email || `${githubUser.id}@github.com`,
-            username: githubUser.login,
+            Oauth: true,
+            id: userData.id,
+            username: userData.username,
+            status: 'active'
         };
 
         // Generate JWT for authenticated user

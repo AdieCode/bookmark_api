@@ -1,311 +1,87 @@
 const BookmarkDB = require('./pool.js');
 
 const updateData = {
-    // content
-    updateReadableContentFieldsById: async function(id, fields, callback) {
+    updateUserReadableContent: async function(data, callback) {
         try {
-            const setClauses = [];
-            const values = [];
-            let index = 1;
+            const { user_id, anilist_id } = data;
 
-            for (const [key, value] of Object.entries(fields)) {
-                setClauses.push(`${key} = $${index}`);
-                values.push(value);
-                index++;
+            if (!user_id || !anilist_id) {
+                return callback(new Error('user_id and anilist_id are required to update'), false);
             }
 
-            if (setClauses.length === 0) {
-                callback('No fields provided for update', false);
-                return;
+            const entries = Object.entries(data)
+                .filter(([key, value]) =>
+                    value !== undefined &&
+                    value !== null &&
+                    key !== 'user_id' &&
+                    key !== 'anilist_id'
+                );
+
+            if (entries.length === 0) {
+                return callback(new Error('No fields provided to update'), false);
             }
 
-            const query = `
-                UPDATE readable_content
+            const setClauses = entries.map(([key], index) => `${key} = $${index + 1}`);
+            const values = entries.map(([_, value]) => value);
+
+            const sql = `
+                UPDATE readable_tracked_content
                 SET ${setClauses.join(', ')}
-                WHERE id = $${index}
+                WHERE user_id = $${values.length + 1} AND anilist_id = $${values.length + 2}
             `;
 
-            values.push(id);
+            values.push(user_id, anilist_id);
 
-            const result = await BookmarkDB.query(query, values);
+            await BookmarkDB.query(sql, values);
 
-            if (result.rowCount > 0) {
-                callback(null, true); // Successfully updated
-            } else {
-                callback('No content found with the given ID', false); // No matching record found
-            }
+            callback(null, true);
         } catch (error) {
-            console.error('Error updating content:', error);
+            console.error('Error updating user readable content:', error);
             callback(error, false);
         }
     },
 
-    updateReadableContentFieldsByContentId: async function(content_id, fields, callback) {
+    updateUserWatchableContent: async function(data, callback) {
         try {
-            const setClauses = [];
-            const values = [];
-            let index = 1;
+            const { user_id, anilist_id } = data;
 
-            for (const [key, value] of Object.entries(fields)) {
-                setClauses.push(`${key} = $${index}`);
-                values.push(value);
-                index++;
+            if (!user_id || !anilist_id) {
+                return callback(new Error('user_id and anilist_id are required to update'), false);
             }
 
-            if (setClauses.length === 0) {
-                callback('No fields provided for update', false);
-                return;
+            const entries = Object.entries(data)
+                .filter(([key, value]) =>
+                    value !== undefined &&
+                    value !== null &&
+                    key !== 'user_id' &&
+                    key !== 'anilist_id'
+                );
+
+            if (entries.length === 0) {
+                return callback(new Error('No fields provided to update'), false);
             }
 
-            const query = `
-                UPDATE readable_content
+            const setClauses = entries.map(([key], index) => `${key} = $${index + 1}`);
+            const values = entries.map(([_, value]) => value);
+
+            const sql = `
+                UPDATE watchable_tracked_content
                 SET ${setClauses.join(', ')}
-                WHERE content_id = $${index}
+                WHERE user_id = $${values.length + 1} AND anilist_id = $${values.length + 2}
             `;
 
-            values.push(content_id);
+            values.push(user_id, anilist_id);
 
-            const result = await BookmarkDB.query(query, values);
+            await BookmarkDB.query(sql, values);
 
-            if (result.rowCount > 0) {
-                callback(null, true);
-            } else {
-                callback('No content found with the given content_id', false);
-            }
+            callback(null, true);
         } catch (error) {
-            console.error('Error updating content:', error);
+            console.error('Error updating user watchable content:', error);
             callback(error, false);
         }
     },
 
-    updateWatchableContentFieldsById: async function(id, fields, callback) {
-        try {
-            const setClauses = [];
-            const values = [];
-            let index = 1;
 
-            for (const [key, value] of Object.entries(fields)) {
-                setClauses.push(`${key} = $${index}`);
-                values.push(value);
-                index++;
-            }
-
-            if (setClauses.length === 0) {
-                callback('No fields provided for update', false);
-                return;
-            }
-
-            const query = `
-                UPDATE watchable_content
-                SET ${setClauses.join(', ')}
-                WHERE id = $${index}
-            `;
-
-            values.push(id);
-
-            const result = await BookmarkDB.query(query, values);
-
-            if (result.rowCount > 0) {
-                callback(null, true);
-            } else {
-                callback('No content found with the given ID', false);
-            }
-        } catch (error) {
-            console.error('Error updating content:', error);
-            callback(error, false);
-        }
-    },
-
-    updateWatchableContentFieldsByContentId: async function(content_id, fields, callback) {
-        try {
-            const setClauses = [];
-            const values = [];
-            let index = 1;
-
-            for (const [key, value] of Object.entries(fields)) {
-                setClauses.push(`${key} = $${index}`);
-                values.push(value);
-                index++;
-            }
-
-            if (setClauses.length === 0) {
-                callback('No fields provided for update', false);
-                return;
-            }
-
-            const query = `
-                UPDATE watchable_content
-                SET ${setClauses.join(', ')}
-                WHERE content_id = $${index}
-            `;
-
-            values.push(content_id);
-
-            const result = await BookmarkDB.query(query, values);
-
-            if (result.rowCount > 0) {
-                callback(null, true);
-            } else {
-                callback('No content found with the given content_id', false);
-            }
-        } catch (error) {
-            console.error('Error updating content:', error);
-            callback(error, false);
-        }
-    },
-
-    //user content
-    updateUserReadableContentFieldsById: async function(user_id, fields, callback) {
-        try {
-            const setClauses = [];
-            const values = [];
-            let index = 1;
-
-            for (const [key, value] of Object.entries(fields)) {
-                setClauses.push(`${key} = $${index}`);
-                values.push(value);
-                index++;
-            }
-
-            if (setClauses.length === 0) {
-                callback('No fields provided for update', false);
-                return;
-            }
-
-            const query = `
-                UPDATE user_readable_content
-                SET ${setClauses.join(', ')}
-                WHERE user_id = $${index}
-            `;
-
-            values.push(user_id);
-
-            const result = await BookmarkDB.query(query, values);
-
-            if (result.rowCount > 0) {
-                callback(null, true); // Successfully updated
-            } else {
-                callback('No user content found with the given ID', false); // No matching record found
-            }
-        } catch (error) {
-            console.error('Error updating content:', error);
-            callback(error, false);
-        }
-    },
-
-    updateUserReadableContentFieldsByContentId: async function(content_id, fields, callback) {
-        try {
-            const setClauses = [];
-            const values = [];
-            let index = 1;
-
-            for (const [key, value] of Object.entries(fields)) {
-                setClauses.push(`${key} = $${index}`);
-                values.push(value);
-                index++;
-            }
-
-            if (setClauses.length === 0) {
-                callback('No fields provided for update', false);
-                return;
-            }
-
-            const query = `
-                UPDATE user_readable_content
-                SET ${setClauses.join(', ')}
-                WHERE content_id = $${index}
-            `;
-
-            values.push(content_id);
-
-            const result = await BookmarkDB.query(query, values);
-
-            if (result.rowCount > 0) {
-                callback(null, true);
-            } else {
-                callback('No user content found with the given content_id', false);
-            }
-        } catch (error) {
-            console.error('Error updating content:', error);
-            callback(error, false);
-        }
-    },
-
-    updateUserWatchableContentFieldsById: async function(user_id, fields, callback) {
-        try {
-            const setClauses = [];
-            const values = [];
-            let index = 1;
-
-            for (const [key, value] of Object.entries(fields)) {
-                setClauses.push(`${key} = $${index}`);
-                values.push(value);
-                index++;
-            }
-
-            if (setClauses.length === 0) {
-                callback('No fields provided for update', false);
-                return;
-            }
-
-            const query = `
-                UPDATE user_watchable_content
-                SET ${setClauses.join(', ')}
-                WHERE user_id = $${index}
-            `;
-
-            values.push(user_id);
-
-            const result = await BookmarkDB.query(query, values);
-
-            if (result.rowCount > 0) {
-                callback(null, true);
-            } else {
-                callback('No user content found with the given ID', false);
-            }
-        } catch (error) {
-            console.error('Error updating content:', error);
-            callback(error, false);
-        }
-    },
-
-    updateUserWatchableContentFieldsByContentId: async function(content_id, fields, callback) {
-        try {
-            const setClauses = [];
-            const values = [];
-            let index = 1;
-
-            for (const [key, value] of Object.entries(fields)) {
-                setClauses.push(`${key} = $${index}`);
-                values.push(value);
-                index++;
-            }
-
-            if (setClauses.length === 0) {
-                callback('No fields provided for update', false);
-                return;
-            }
-
-            const query = `
-                UPDATE user_watchable_content
-                SET ${setClauses.join(', ')}
-                WHERE content_id = $${index}
-            `;
-
-            values.push(content_id);
-
-            const result = await BookmarkDB.query(query, values);
-
-            if (result.rowCount > 0) {
-                callback(null, true);
-            } else {
-                callback('No user content found with the given content_id', false);
-            }
-        } catch (error) {
-            console.error('Error updating content:', error);
-            callback(error, false);
-        }
-    },
    
 };
 
