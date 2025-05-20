@@ -110,15 +110,15 @@ const enrich = {
         }
     },
 
-    convertToStanderdContentFormat: function (mangaData) {
-        console.log('this is the manga data == > ', mangaData)
+    convertToStanderdContentFormat: function (contentData) {
+        console.log('this is the manga data == > ', contentData)
 
-        if (!mangaData || !mangaData.data || !mangaData.data.Page || !Array.isArray(mangaData.data.Page.media)) {
-            throw new Error('Invalid mangaData format');
+        if (!contentData || !contentData.data || !contentData.data.Page || !Array.isArray(contentData.data.Page.media)) {
+            throw new Error('Invalid contentData format');
         };
     
         try {
-            const formattedData = mangaData.data.Page.media.map(media => ({
+            const formattedData = contentData.data.Page.media.map(media => ({
                 anilist_content_id: media.id,
                 title: media.title,
                 genres: media.genres,
@@ -139,7 +139,7 @@ const enrich = {
     
             return formattedData;
         } catch (error) {
-            throw new Error('Error formatting mangaData: ' + error.message);
+            throw new Error('Error formatting contentData : ' + error.message);
         }
     },
 

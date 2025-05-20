@@ -4,10 +4,19 @@ const getContentFromAnilist = require("../../utils/anilist/aniList.js");
 const getContentFromAnilistById = require("../../utils/anilist/getById.js");
 const getContentBySearch = require("../../utils/anilist/getBySearch.js");
 const enrich = require("../../utils/enrich.js")
+const cache = require("../../utils/cache/cache.js");
 
 router.get('/get_manga_content', async (req, res, next) => {
     try { 
         const currentPage = req.query.page || 1;
+        const cacheKey = `manga-content-page:${currentPage}`;
+
+        const cached = cache.get(cacheKey);
+        if (cached) {
+            console.log('Cache hit for key:', cacheKey);
+            return res.json(cached);
+        }
+
         let fetchedData = await getContentFromAnilist("MANGA", null, currentPage );
 
         if (!fetchedData || !fetchedData.data || !fetchedData.data.Page) {
@@ -17,6 +26,7 @@ router.get('/get_manga_content', async (req, res, next) => {
         const convertedFetchedResults = enrich.convertToStanderdContentFormat(fetchedData);
 
         const results = enrich.convertToSendBackFormat(fetchedData.data.Page.pageInfo, convertedFetchedResults);
+        cache.set(cacheKey, results);
         res.json(results);
     } catch (error) {
         console.error('Error occurred in /get_manga_content:', error);
@@ -40,6 +50,14 @@ router.post('/get_manga_content_specific', async (req, res, next) => {
 router.get('/get_anime_content', async (req, res, next) => {
     try {
         const currentPage = req.query.page || 1;
+        const cacheKey = `anime-content-page:${currentPage}`;
+
+        const cached = cache.get(cacheKey);
+        if (cached) {
+            console.log('Cache hit for key:', cacheKey);
+            return res.json(cached);
+        }
+
         let fetchedData = await getContentFromAnilist("ANIME", null, currentPage );
 
         if (!fetchedData || !fetchedData.data || !fetchedData.data.Page) {
@@ -49,6 +67,7 @@ router.get('/get_anime_content', async (req, res, next) => {
         const convertedFetchedResults = enrich.convertToStanderdContentFormat(fetchedData);
 
         const results = enrich.convertToSendBackFormat(fetchedData.data.Page.pageInfo, convertedFetchedResults);
+        cache.set(cacheKey, results);
         res.json(results);
     } catch (error) {
         console.error('Error occurred in /get_anime_content:', error);
@@ -69,13 +88,24 @@ router.post('/get_anime_content_specific', async (req, res, next) => {
     }
 });
 
-router.post('/get_manga_content_by_id', async (req, res, next) => { 
+router.post('/get_content_by_id', async (req, res, next) => { 
     const id = req.body.id;
-    console.log("this is the ID GIVEN: ", req.body) 
+    if (!id) {
+        return res.status(400).json({ error: 'ID is required' });
+    }
+
+    const cacheKey = `content:${id}`;
+
+    const cached = cache.get(cacheKey);
+    if (cached) {
+        return res.json(cached);
+    }
+
     try {
         let fetcedData = await getContentFromAnilistById(id); 
         const convertedFecthedResults = enrich.convertToStanderdContentFormat(fetcedData) 
         const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
+        cache.set(cacheKey, results);
         res.json(results); 
     } catch (error) {
         console.error('Error occurred /get_manga_content_by_id:', error);

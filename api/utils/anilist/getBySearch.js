@@ -5,7 +5,6 @@ const {
 } = require("../responseHandlers.js");
 
 const query = global.config.aniList.query.getContentBySearch; 
-console.log("Query for AniList:", query);
 const url =   global.config.aniList.baseUrl; 
 const options = {
     method: 'POST',
@@ -21,7 +20,7 @@ const getContentBySearch = async (searchTerm = null, page = 1, perPage = 100, so
         search: searchTerm || null,  // Use the search term or default to null if empty
         page: page,                  // Default to page 1
         perPage: perPage,            // Default to 100 results per page
-        sort: searchTerm ? null : [sort] // If search term is provided, don't use sort, otherwise use sorting
+        sort: [sort] // If search term is provided, don't use sort, otherwise use sorting
     };
 
     try {
@@ -43,7 +42,7 @@ const getContentBySearch = async (searchTerm = null, page = 1, perPage = 100, so
         return handleAniListData(data);
     } catch (error) {
         handleError(error); 
-        return {message: 'i ran'}
+        return {}
     }
 };
 
