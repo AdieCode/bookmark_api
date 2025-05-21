@@ -3,6 +3,7 @@ const router = express.Router();
 const getContentFromAnilist = require("../../utils/anilist/aniList.js");
 const getContentFromAnilistById = require("../../utils/anilist/getById.js");
 const getContentBySearch = require("../../utils/anilist/getBySearch.js");
+const {getMangaContentFromAnilistByFilters, getAnimeContentFromAnilistByFilters} = require("../../utils/anilist/getByFilter.js");
 const enrich = require("../../utils/enrich.js")
 const cache = require("../../utils/cache/cache.js");
 
@@ -138,6 +139,63 @@ router.get('/get_content_by_search', async (req, res, next) => {
         next(error);
     } 
 });
+
+router.post('/get_manga_content_by_filters', async (req, res, next) => { 
+    const filters = req.body.filters;
+    const page = req.body.page || 1;
+    if (!filters) {
+        return res.status(400).json({ error: 'filters are required' });
+    }
+
+    const keyBase = JSON.stringify(filters);
+    const encodedFilters = encodeURIComponent(keyBase);
+    const cacheKey = `manga-content:${page}:${encodedFilters}`;
+
+    const cached = cache.get(cacheKey);
+    if (cached) {
+        return res.json(cached);
+    }
+
+    try {
+        let fetcedData = await getMangaContentFromAnilistByFilters(filters, page); 
+        const convertedFecthedResults = enrich.convertToStanderdContentFormat(fetcedData) 
+        const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
+        cache.set(cacheKey, results);
+        res.json(results); 
+    } catch (error) {
+        console.error('Error occurred /get_content_by_filters:', error);
+        next(error);
+    }
+});
+
+router.post('/get_anime_content_by_filters', async (req, res, next) => { 
+    const filters = req.body.filters;
+    const page = req.body.page || 1;
+    if (!filters) {
+        return res.status(400).json({ error: 'filters are required' });
+    }
+
+    const keyBase = JSON.stringify(filters);
+    const encodedFilters = encodeURIComponent(keyBase);
+    const cacheKey = `anime-content:${page}:${encodedFilters}`;
+
+    const cached = cache.get(cacheKey);
+    if (cached) {
+        return res.json(cached);
+    }
+
+    try {
+        let fetcedData = await getAnimeContentFromAnilistByFilters(filters, page); 
+        const convertedFecthedResults = enrich.convertToStanderdContentFormat(fetcedData) 
+        const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
+        cache.set(cacheKey, results);
+        res.json(results); 
+    } catch (error) {
+        console.error('Error occurred /get_content_by_filters:', error);
+        next(error);
+    }
+});
+
 
 module.exports = router;
 

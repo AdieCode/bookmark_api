@@ -4,46 +4,154 @@ const {
     handleError 
 } = require("../responseHandlers.js");
 
-const query = global.config.aniList.query.getContentByFilters; 
-const url =   global.config.aniList.baseUrl; 
+// const query = global.config.aniList.query.getContentByFilters;
+const stadardMediaBody = global.config.aniList.query.standerdMediaData;
+const url = global.config.aniList.baseUrl;
+
 const options = {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'Cache-Control': 'no-cache'
     }
 };
 
-const getContentFromAnilist = async (type = null, searchTerm = null, page = 1, perPage = 100, sort = 'POPULARITY_DESC') => {
-    // Set variables dynamically based on searchTerm
-    var variables = {
-        search: searchTerm || null,  // Use the search term or default to null if empty
-        page: page,                  // Default to page 1
-        perPage: perPage,            // Default to 100 results per page
-        type: type,               // Static filter for media type
-        sort: searchTerm ? null : [sort] // If search term is provided, don't use sort, otherwise use sorting
-    };
+function buildMangaQuery(filters, page) {
+    const variableDefs = [];
+    const mediaArgs = [];
+    const variables = {};
+
+    // Always include these
+    variableDefs.push('$page: Int', '$perPage: Int', '$type: MediaType', '$sort: [MediaSort]');
+    mediaArgs.push('type: $type', 'sort: $sort');
+    variables.page = page || 1;
+    variables.perPage = filters.perPage || 50;
+    variables.type = 'MANGA';
+    variables.sort = [filters.sort || 'POPULARITY_DESC'];
+
+    // Conditionally add filters
+    if (filters.genre_in) {
+        variableDefs.push('$genre_in: [String]');
+        mediaArgs.push('genre_in: $genre_in');
+        variables.genre_in = filters.genre_in;
+    }
+    if (filters.status) {
+        variableDefs.push('$status: MediaStatus');
+        mediaArgs.push('status: $status');
+        variables.status = filters.status;
+    }
+    if (filters.countryOfOrigin) {
+        variableDefs.push('$countryOfOrigin: CountryCode');
+        mediaArgs.push('countryOfOrigin: $countryOfOrigin');
+        variables.countryOfOrigin = filters.countryOfOrigin;
+    }
+
+    // Build the query string
+    const query = `
+        query (${variableDefs.join(', ')}) {
+            Page(page: $page, perPage: $perPage) {
+                pageInfo { total currentPage lastPage hasNextPage perPage }
+                media(${mediaArgs.join(', ')}) ${stadardMediaBody}
+            }
+        }
+    `;
+
+    return { query, variables };
+}
+
+function buildAnimeQuery(filters, page) {
+    const variableDefs = [];
+    const mediaArgs = [];
+    const variables = {};
+
+    // Always include these
+    variableDefs.push('$page: Int', '$perPage: Int', '$type: MediaType', '$sort: [MediaSort]');
+    mediaArgs.push('type: $type', 'sort: $sort');
+    variables.page = page || 1;
+    variables.perPage = filters.perPage || 50;
+    variables.type = 'ANIME';
+    variables.sort = [filters.sort || 'POPULARITY_DESC'];
+
+    // Conditionally add filters
+    if (filters.genre_in) {
+        variableDefs.push('$genre_in: [String]');
+        mediaArgs.push('genre_in: $genre_in');
+        variables.genre_in = filters.genre_in;
+    }
+    if (filters.status) {
+        variableDefs.push('$status: MediaStatus');
+        mediaArgs.push('status: $status');
+        variables.status = filters.status;
+    }
+
+    if (filters.format) {
+        variableDefs.push('$format: MediaFormat');
+        mediaArgs.push('format: $format');
+        variables.format = filters.format;
+    }
+    // ...repeat for other filters...
+
+    // Build the query string
+    const query = `
+        query (${variableDefs.join(', ')}) {
+            Page(page: $page, perPage: $perPage) {
+                pageInfo { total currentPage lastPage hasNextPage perPage }
+                media(${mediaArgs.join(', ')}) ${stadardMediaBody}
+            }
+        }
+    `;
+
+    return { query, variables };
+}
+
+const getMangaContentFromAnilistByFilters = async (filters = {}, page = 1, perPage = 50, sort = 'POPULARITY_DESC') => {
+
+    const {query, variables} = buildMangaQuery(filters, page);
 
     try {
-        // Merge the query with the updated variables
         const response = await fetch(url, {
             ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Cache-Control': 'no-cache' // Prevent cached responses
-            },
             body: JSON.stringify({
                 query: query,
                 variables: variables
             })
         });
-        const data = await handleAnilistResponse(response);
-        return handleAniListData(data);
+
+        const rawData = await handleAnilistResponse(response);
+        const allData = handleAniListData(rawData);
+
+        return allData;
+
     } catch (error) {
-        return{}
         handleError(error);
+        return {};
     }
 };
 
-module.exports = getContentFromAnilist;
+const getAnimeContentFromAnilistByFilters = async (filters = {}, page = 1, perPage = 50, sort = 'POPULARITY_DESC') => {
+
+    const {query, variables} = buildAnimeQuery(filters, page);
+
+    try {
+        console.log('calling anilist api for anime');
+        const response = await fetch(url, {
+            ...options,
+            body: JSON.stringify({
+                query: query,
+                variables: variables
+            })
+        });
+
+        const rawData = await handleAnilistResponse(response);
+        const allData = handleAniListData(rawData);
+
+        return allData;
+
+    } catch (error) {
+        handleError(error);
+        return {};
+    }
+};
+
+module.exports = {getMangaContentFromAnilistByFilters, getAnimeContentFromAnilistByFilters};

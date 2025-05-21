@@ -1,6 +1,31 @@
 aniList:
     baseUrl: https://graphql.anilist.co
     query:
+        standerdMediaData: |
+            {
+                id
+                title {
+                    romaji
+                    english
+                    native
+                }
+                genres
+                tags {
+                    name
+                }
+                description
+                type
+                format
+                coverImage {
+                    large
+                }
+                status
+                averageScore
+                volumes
+                chapters
+                episodes
+                isAdult
+            }
         getContent: |
             query ($id: Int, $page: Int, $perPage: Int, $search: String, $type: MediaType, $sort: [MediaSort]) {
                 Page(page: $page, perPage: $perPage) {
@@ -131,16 +156,15 @@ aniList:
             }
         getContentByFilters: |
             query (
-                $id: Int,
                 $page: Int,
                 $perPage: Int,
-                $search: String,
                 $type: MediaType,
                 $sort: [MediaSort],
                 $genre_in: [String],
                 $status: MediaStatus,
-                $countryOfOrigin_in: [CountryCode],
-                $seasonYear_in: [Int],
+                $countryOfOrigin: CountryCode,
+                $startDate_lesser: FuzzyDateInt,
+                $startDate_greater: FuzzyDateInt,
                 $format_in: [MediaFormat],
                 $tag_in: [String]
             ){
@@ -153,14 +177,13 @@ aniList:
                     perPage
                     }
                     media(
-                    id: $id,
-                    search: $search,
                     type: $type,
                     sort: $sort,
                     genre_in: $genre_in,
                     status: $status,
-                    countryOfOrigin_in: $countryOfOrigin_in,
-                    seasonYear_in: $seasonYear_in,
+                    countryOfOrigin: $countryOfOrigin,
+                    startDate_lesser: $startDate_lesser,
+                    startDate_greater: $startDate_greater,
                     format_in: $format_in,
                     tag_in: $tag_in
                     ) {
