@@ -1,5 +1,7 @@
 aniList:
     baseUrl: https://graphql.anilist.co
+    options:
+        isAdult: false
     query:
         standerdMediaData: |
             {
@@ -85,6 +87,7 @@ aniList:
                         averageScore
                         volumes
                         chapters
+                        episodes
                         isAdult
                         relations {
                             edges {
