@@ -46,12 +46,14 @@ function buildMangaQuery(filters, page) {
         variables.countryOfOrigin = filters.countryOfOrigin;
     }
 
-    // filter for isAdult
-    if (isAdult) {
-        variableDefs.push('$isAdult: Boolean');
-        mediaArgs.push('isAdult: $isAdult');
-        variables.isAdult = isAdult || false;
-    }
+    
+    variableDefs.push('$isAdult: Boolean');
+    mediaArgs.push('isAdult: $isAdult');
+    variables.isAdult = isAdult;
+
+
+    console.log('mediaArgs -->', mediaArgs);
+    console.log('variables -->', variables);
     
 
     // Build the query string
