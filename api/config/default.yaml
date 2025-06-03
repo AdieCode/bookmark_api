@@ -1,3 +1,10 @@
+cache:
+    enabled: true
+    size: 2000
+    expirationMinutes: 10  # 10 minutes
+    ResetTtlPerAccess: false
+
+
 aniList:
     baseUrl: https://graphql.anilist.co
     options:
@@ -247,8 +254,3 @@ aniList:
                     }
                 }
             }
-cache:
-    enabled: true
-    size: 2000
-    expirationMinutes: 10  # 10 minutes
-    ResetTtlPerAccess: false

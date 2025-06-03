@@ -61,7 +61,6 @@ const isAuthenticated = (req, res, next) => {
                 console.error(err)
                 return res.status(401).json({ auth: false, error: 'Unauthorized, you are not authorized to access this endpoint' });
             }
-            console.log(decoded)
             req.user = decoded;
             next();
         });

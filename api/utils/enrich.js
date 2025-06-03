@@ -111,7 +111,6 @@ const enrich = {
     },
 
     convertToStanderdContentFormat: function (contentData) {
-        console.log('this is the manga data == > ', contentData)
 
         if (!contentData || !contentData.data || !contentData.data.Page || !Array.isArray(contentData.data.Page.media)) {
             throw new Error('Invalid contentData format');

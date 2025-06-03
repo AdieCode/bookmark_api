@@ -2,7 +2,7 @@ const {
     handleAnilistResponse,
     handleAniListData,
     handleError 
-} = require("../responseHandlers.js");
+} = require("../externalResponseHandlers.js");
 
 const query = global.config.aniList.query.getContentBySearch; 
 const url =   global.config.aniList.baseUrl; 
@@ -15,16 +15,14 @@ const options = {
 };
 
 const getContentBySearch = async (searchTerm = null, page = 1, perPage = 100, sort = 'POPULARITY_DESC') => {
-    // Set variables dynamically based on searchTerm
-    var variables = {
-        search: searchTerm || null,  // Use the search term or default to null if empty
-        page: page,                  // Default to page 1
-        perPage: perPage,            // Default to 100 results per page
-        sort: [sort] // If search term is provided, don't use sort, otherwise use sorting
+    const variables = {
+        search: searchTerm || null,  
+        page: page,                  
+        perPage: perPage,            
+        sort: [sort] 
     };
 
     try {
-        // Merge the query with the updated variables
         const response = await fetch(url, {
             ...options,
             headers: {
@@ -37,7 +35,7 @@ const getContentBySearch = async (searchTerm = null, page = 1, perPage = 100, so
                 variables: variables
             })
         });
-        console.log("Response from AniList:", response);
+        
         const data = await handleAnilistResponse(response);
         return handleAniListData(data);
     } catch (error) {

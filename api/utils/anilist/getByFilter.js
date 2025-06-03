@@ -2,12 +2,11 @@ const {
     handleAnilistResponse,
     handleAniListData,
     handleError 
-} = require("../responseHandlers.js");
+} = require("../externalResponseHandlers.js");
 
-// const query = global.config.aniList.query.getContentByFilters;
 const stadardMediaBody = global.config.aniList.query.standerdMediaData;
 const url = global.config.aniList.baseUrl;
-
+const isAdult = global.config.aniList.options.isAdult;
 const options = {
     method: 'POST',
     headers: {
@@ -46,6 +45,14 @@ function buildMangaQuery(filters, page) {
         mediaArgs.push('countryOfOrigin: $countryOfOrigin');
         variables.countryOfOrigin = filters.countryOfOrigin;
     }
+
+    // filter for isAdult
+    if (isAdult) {
+        variableDefs.push('$isAdult: Boolean');
+        mediaArgs.push('isAdult: $isAdult');
+        variables.isAdult = isAdult || false;
+    }
+    
 
     // Build the query string
     const query = `
@@ -90,9 +97,8 @@ function buildAnimeQuery(filters, page) {
         mediaArgs.push('format: $format');
         variables.format = filters.format;
     }
-    // ...repeat for other filters...
 
-    // Build the query string
+    // Compile the query string right here
     const query = `
         query (${variableDefs.join(', ')}) {
             Page(page: $page, perPage: $perPage) {
@@ -143,15 +149,15 @@ const getAnimeContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
             })
         });
 
-        const rawData = await handleAnilistResponse(response);
-        const allData = handleAniListData(rawData);
-
-        return allData;
-
+        const data = await handleAnilistResponse(response);
+        return handleAniListData(data);
     } catch (error) {
         handleError(error);
         return {};
     }
 };
 
-module.exports = {getMangaContentFromAnilistByFilters, getAnimeContentFromAnilistByFilters};
+module.exports = { 
+    getMangaContentFromAnilistByFilters, // for manga content
+    getAnimeContentFromAnilistByFilters // for anime content
+};
