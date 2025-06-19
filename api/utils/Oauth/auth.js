@@ -195,4 +195,10 @@ const githubOAuth = async (req, res) => {
     }
 };
 
-module.exports = { hashPassword, checkPassword, isAuthenticated, googleOAuth, githubOAuth};
+module.exports = { 
+    hashPassword, 
+    checkPassword,
+    isAuthenticated,
+    googleOAuth,
+    githubOAuth
+};

@@ -4,9 +4,9 @@ const {
     handleError 
 } = require("../externalResponseHandlers.js");
 
-const query = global.config.aniList.query.getContentById; 
+// const query = global.config.aniList.query.getContentById; 
 const url =   global.config.aniList.baseUrl;
-const isAdult = global.config.aniList.options.isAdult;
+// const isAdult = global.config.aniList.options.isAdult;
 const options = {
     method: 'POST',
     headers: {
@@ -14,6 +14,32 @@ const options = {
         'Accept': 'application/json',
     }
 };
+
+const mediaFormat = global.config.aniList.query.media; 
+const relationsFormat = global.config.aniList.query.relations; 
+const recommendationsFormat = global.config.aniList.query.recommendations; 
+const charactersFormat = global.config.aniList.query.characters; 
+
+const query = `
+    query ($id: Int) {
+        Page {
+            pageInfo { 
+                total 
+                currentPage 
+                lastPage 
+                hasNextPage 
+                perPage 
+            }
+            media(id: $id) {
+            ${mediaFormat}
+            ${relationsFormat}
+            ${recommendationsFormat}
+            ${charactersFormat}
+            }
+        }
+    }
+`;
+
 
 const getContentFromAnilistById = async (id) => {
     if (!id) {
@@ -34,7 +60,6 @@ const getContentFromAnilistById = async (id) => {
         });
         
         const data = await handleAnilistResponse(response);
-        console.log('Anilist response data:', data);
         return handleAniListData(data);
     } catch (error) {
         handleError(error);

@@ -3,8 +3,8 @@ const { checkPassword } = require('../utils/Oauth/auth.js');
 
 
 const getData = {
+    // checks if username already exists
     checkUsername: async function(username) {
-        // checks if username already exists
         try {
             const result = await BookmarkDB.query('SELECT * FROM users WHERE username = $1', [username]);
             return result.rows.length > 0;
@@ -14,8 +14,8 @@ const getData = {
         }
     },
 
+    // checks if email already exists
     checkEmail: async function(email) {
-        // checks if email already exists
         try {
             const result = await BookmarkDB.query('SELECT * FROM users WHERE email = $1', [email]);
             return result.rows.length > 0;
@@ -33,7 +33,6 @@ const getData = {
                 return;
             }
             
-            // Check if any matching records were found
             if (res.rows.length > 0) {
                 const isValidPassword = await checkPassword(password, res.rows[0].password);
                 if (isValidPassword){
@@ -41,9 +40,7 @@ const getData = {
                 } else {
                     callback(null, false);
                 }
-                // Credentials are correct
             } else {
-                // No matching records found, credentials are incorrect
                 callback(null, false);
             }
         });
@@ -64,7 +61,7 @@ const getData = {
             const result = await BookmarkDB.query(sql, [externalId]);
 
             if (result.rows.length > 0) {
-                callback(null, result.rows[0]); // User exists, return user
+                callback(null, result.rows[0]); // User exists
             } else {
                 callback(null, null); // User does not exist
             }

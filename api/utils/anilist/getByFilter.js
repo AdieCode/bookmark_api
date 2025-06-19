@@ -4,7 +4,8 @@ const {
     handleError 
 } = require("../externalResponseHandlers.js");
 
-const stadardMediaBody = global.config.aniList.query.standerdMediaData;
+
+const mediaFormat = global.config.aniList.query.media; 
 const url = global.config.aniList.baseUrl;
 const isAdult = global.config.aniList.options.isAdult;
 const options = {
@@ -61,7 +62,9 @@ function buildMangaQuery(filters, page) {
         query (${variableDefs.join(', ')}) {
             Page(page: $page, perPage: $perPage) {
                 pageInfo { total currentPage lastPage hasNextPage perPage }
-                media(${mediaArgs.join(', ')}) ${stadardMediaBody}
+                media(${mediaArgs.join(', ')}) {
+                ${mediaFormat}
+                }
             }
         }
     `;
@@ -105,7 +108,9 @@ function buildAnimeQuery(filters, page) {
         query (${variableDefs.join(', ')}) {
             Page(page: $page, perPage: $perPage) {
                 pageInfo { total currentPage lastPage hasNextPage perPage }
-                media(${mediaArgs.join(', ')}) ${stadardMediaBody}
+                media(${mediaArgs.join(', ')}) {
+                ${mediaFormat}
+                }
             }
         }
     `;

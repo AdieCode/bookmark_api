@@ -81,8 +81,8 @@ app.use(morgan(function (tokens, req, res) {
 		tokens['request-headers'](req, res), // This will print the request headers in formatted JSON
 		'\n\nRequest Body:',
 		tokens['request-body'](req, res),    // This will print the request body in formatted JSON
-		'\n\nResponse Body:',
-		tokens['response-body'](req, res),   // This will print the response body in formatted JSON
+		// '\n\nResponse Body:',
+		// tokens['response-body'](req, res),   // This will print the response body in formatted JSON
 		"\n",
 	].join(' ');
 }));

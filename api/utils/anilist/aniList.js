@@ -4,15 +4,25 @@ const {
     handleError 
 } = require("../externalResponseHandlers.js");
 
-const query = global.config.aniList.query.getContent; 
 const url =   global.config.aniList.baseUrl; 
-const options = {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+const mediaFormat = global.config.aniList.query.media; 
+
+const query = `
+    query ($id: Int, $page: Int, $perPage: Int, $search: String, $type: MediaType, $sort: [MediaSort]) {
+        Page(page: $page, perPage: $perPage) {
+            pageInfo { 
+                total 
+                currentPage 
+                lastPage 
+                hasNextPage 
+                perPage 
+            }
+            media(id: $id, search: $search, type: $type, sort: $sort) {
+            ${mediaFormat}
+            }
+        }
     }
-};
+`;
 
 const getContentFromAnilist = async (type = null, searchTerm = null, page = 1, perPage = 100, sort = 'POPULARITY_DESC') => {
 
@@ -26,7 +36,7 @@ const getContentFromAnilist = async (type = null, searchTerm = null, page = 1, p
 
     try {
         const response = await fetch(url, {
-            ...options,
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',

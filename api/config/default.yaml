@@ -10,247 +10,94 @@ aniList:
     options:
         isAdult: false
     query:
-        standerdMediaData: |
-            {
-                id
-                title {
-                    romaji
-                    english
-                    native
-                }
-                genres
-                tags {
-                    name
-                }
-                description
-                type
-                format
-                coverImage {
-                    large
-                }
-                status
-                averageScore
-                volumes
-                chapters
-                episodes
-                isAdult
+        media: |
+            id
+            title {
+                romaji
+                english
+                native
             }
-        getContent: |
-            query ($id: Int, $page: Int, $perPage: Int, $search: String, $type: MediaType, $sort: [MediaSort]) {
-                Page(page: $page, perPage: $perPage) {
-                    pageInfo {
-                        total
-                        currentPage
-                        lastPage
-                        hasNextPage
-                        perPage
-                    }
-                    media(id: $id, search: $search, type: $type, sort: $sort) {
+            genres
+            tags {
+                name
+            }
+            description
+            type
+            format
+            coverImage {
+                large
+            }
+            status
+            averageScore
+            volumes
+            chapters
+            episodes
+            isAdult
+        relations: |
+            relations {
+                edges {
+                    relationType
+                    node {
                         id
                         title {
                             romaji
                             english
-                            native
-                        }
-                        genres 
-                        description
-                        type
-                        coverImage { 
-                            large 
-                        }
-                        status
-                        averageScore
-                        volumes
-                        chapters
-                        episodes
-                        isAdult
-                    }
-                }
-            }
-        getContentById: |
-            query ($id: Int) {
-                Page {
-                    pageInfo {
-                        total
-                        currentPage
-                        lastPage
-                        hasNextPage
-                        perPage
-                    }
-                    media(id: $id) {
-                        id
-                        title {
-                            romaji
-                            english
-                            native
                         }
                         genres 
                         description
                         type
                         coverImage {
-                            extraLarge  
+                            extraLarge
                         }
-                        status
-                        averageScore
                         volumes
                         chapters
                         episodes
+                        status
+                        averageScore
                         isAdult
-                        relations {
-                            edges {
-                                relationType
-                                node {
-                                    id
-                                    title {
-                                        romaji
-                                        english
-                                    }
-                                    genres 
-                                    description
-                                    type
-                                    coverImage {
-                                        extraLarge
-                                    }
-                                    volumes
-                                    chapters
-                                    episodes
-                                    status
-                                    averageScore
-                                    isAdult
-                                }
-                            }
-                        }
-                        recommendations {
-                            edges {
-                                node {
-                                    id
-                                    mediaRecommendation {
-                                        id
-                                        title {
-                                            romaji
-                                            english
-                                        }
-                                        genres 
-                                        description
-                                        type
-                                        coverImage {
-                                            extraLarge
-                                        }
-                                        volumes
-                                        chapters
-                                        episodes
-                                        status
-                                        averageScore
-                                        isAdult
-                                    }
-                                    rating
-                                }
-                            }
-                        }
-                        characters {
-                            edges {
-                                role
-                                node {
-                                    id
-                                    name {
-                                        full
-                                    }
-                                    image {
-                                        large
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
-        getContentByFilters: |
-            query (
-                $page: Int,
-                $perPage: Int,
-                $type: MediaType,
-                $sort: [MediaSort],
-                $genre_in: [String],
-                $status: MediaStatus,
-                $countryOfOrigin: CountryCode,
-                $startDate_lesser: FuzzyDateInt,
-                $startDate_greater: FuzzyDateInt,
-                $format_in: [MediaFormat],
-                $tag_in: [String]
-            ){
-                Page(page: $page, perPage: $perPage) {
-                    pageInfo {
-                    total
-                    currentPage
-                    lastPage
-                    hasNextPage
-                    perPage
-                    }
-                    media(
-                    type: $type,
-                    sort: $sort,
-                    genre_in: $genre_in,
-                    status: $status,
-                    countryOfOrigin: $countryOfOrigin,
-                    startDate_lesser: $startDate_lesser,
-                    startDate_greater: $startDate_greater,
-                    format_in: $format_in,
-                    tag_in: $tag_in
-                    ) {
-                    id
-                    title {
-                        romaji
-                        english
-                        native
-                    }
-                    genres
-                    tags {
-                        name
-                    }
-                    description
-                    type
-                    format
-                    coverImage {
-                        large
-                    }
-                    status
-                    averageScore
-                    volumes
-                    chapters
-                    episodes
-                    isAdult
-                    }
-                }
-            }
-        getContentBySearch: |
-            query ($page: Int, $perPage: Int, $search: String, $sort: [MediaSort]) {
-                Page(page: $page, perPage: $perPage) {
-                    pageInfo {
-                        total
-                        currentPage
-                        lastPage
-                        hasNextPage
-                        perPage
-                    }
-                    media(search: $search, sort: $sort) {
+        recommendations: |
+            recommendations {
+                edges {
+                    node {
                         id
-                        title {
-                            romaji
-                            english
-                            native
+                        mediaRecommendation {
+                            id
+                            title {
+                                romaji
+                                english
+                            }
+                            genres 
+                            description
+                            type
+                            coverImage {
+                                extraLarge
+                            }
+                            volumes
+                            chapters
+                            episodes
+                            status
+                            averageScore
+                            isAdult
                         }
-                        genres 
-                        description
-                        type
-                        coverImage { 
-                            large 
+                        rating
+                    }
+                }
+            }
+        characters: |
+            characters {    
+                edges {
+                    role
+                    node {
+                        id
+                        name {
+                            full
                         }
-                        status
-                        averageScore
-                        volumes
-                        chapters
-                        episodes
-                        isAdult
+                        image {
+                            large
+                        }
                     }
                 }
             }
