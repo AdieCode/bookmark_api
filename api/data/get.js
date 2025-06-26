@@ -71,17 +71,17 @@ const getData = {
         }
     },
 
-    getUserReadableContent: async function(user_id, callback) {
+    getUserReadableContent: async function(user_id, status, callback) {
         try {
             const result = await BookmarkDB.query(
-                'SELECT user_id, content_id, current_vol, current_chapter, personal_score, status FROM user_readable_content WHERE user_id = $1',
-                [user_id]
+                'SELECT * FROM readable_tracked_content WHERE user_id = $1 AND status = $2',
+                [user_id, status]
             );
     
             if (result.rows.length > 0) {
                 callback(null, result.rows);
             } else {
-                callback('No content found for this user ID', null);
+                callback('No content found for this user ID and status', null);
             }
         } catch (error) {
             console.error('Error retrieving readable content:', error);

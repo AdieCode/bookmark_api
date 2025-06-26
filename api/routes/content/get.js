@@ -98,6 +98,7 @@ router.post('/get_content_by_id', async (req, res, next) => {
     const cacheKey = `content:${id}`;
 
     const cached = cache.get(cacheKey);
+    
     if (cached) {
         return res.json(cached);
     }

@@ -21,8 +21,8 @@ router.post('/add_user_manga_content', async (req, res) => {
     }
 
     try {
-        if (!data.user_id || !['planning', 'busy', 'completed'].includes(data.status)) {
-            console.error('Error occurred: Invalid user_id or status');
+        if (!data.anilist_id || !data.user_id || !['planning', 'busy', 'completed'].includes(data.status)) {
+            console.error('Error occurred: Invalid anilist_id or user_id or status', '\n response recieved ==> ', JSON.stringify(data));
             return res.status(400).json({ success: false, message: 'data sent was incorrect' });
         }
 
@@ -61,8 +61,8 @@ router.post('/add_user_anime_content', async (req, res) => {
     }
 
     try {
-        if (!data.user_id || !['planning', 'busy', 'completed'].includes(data.status)) {
-            console.error('Error occurred: Invalid user_id or status');
+        if (!data.anilist_id || !data.user_id || !['planning', 'busy', 'completed'].includes(data.status)) {
+            console.log('Error occurred: Invalid anilist_id or user_id or status', 'response recieved ==> ', JSON.stringify(data));
             return res.status(400).json({ success: false, message: 'data sent was incorrect' });
         }
 

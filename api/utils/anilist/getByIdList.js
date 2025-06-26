@@ -16,12 +16,9 @@ const options = {
 };
 
 const mediaFormat = global.config.aniList.query.media; 
-const relationsFormat = global.config.aniList.query.relations; 
-const recommendationsFormat = global.config.aniList.query.recommendations; 
-const charactersFormat = global.config.aniList.query.characters; 
 
 const query = `
-    query ($id: Int) {
+    query ($id_in: [Int]) {
         Page {
             pageInfo { 
                 total 
@@ -30,24 +27,22 @@ const query = `
                 hasNextPage 
                 perPage 
             }
-            media(id: $id) {
+            media(id_in: $id_in) {
             ${mediaFormat}
-            ${relationsFormat}
-            ${recommendationsFormat}
-            ${charactersFormat}
             }
         }
     }
 `;
 
 
-const getContentFromAnilistById = async (id) => {
-    if (!id) {
-        throw new Error('ID is required to fetch content');
+const getContentFromAnilistByIdList = async (idList) => {
+    if (!idList) {
+        throw new Error('ID list is required to fetch content');
     }
+    console.log('getContentFromAnilistByIdList called with idList:', idList);
 
     const variables = {
-        id: id
+        id_in: idList
     };
 
     try {
@@ -58,8 +53,10 @@ const getContentFromAnilistById = async (id) => {
                 variables: variables
             })
         });
+
         
         const data = await handleAnilistResponse(response);
+        // console.log('Response from AniList:', data.status, JSON.stringify(data));
         return handleAniListData(data);
     } catch (error) {
         handleError(error);
@@ -67,4 +64,4 @@ const getContentFromAnilistById = async (id) => {
     }
 };
 
-module.exports = getContentFromAnilistById;
+module.exports = getContentFromAnilistByIdList;

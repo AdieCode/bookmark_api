@@ -85,6 +85,8 @@ app.use(morgan(function (tokens, req, res) {
 		// tokens['response-body'](req, res),   // This will print the response body in formatted JSON
 		"\n",
 	].join(' ');
+}, {
+	skip: function (req, res) { return req.method === 'OPTIONS'; }
 }));
 
 app.use(cors());

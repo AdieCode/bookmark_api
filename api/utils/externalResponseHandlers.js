@@ -15,6 +15,22 @@ const handleAniListData = (data) => {
     }
 };
 
+// const handleAniListData = (data) => {
+//     if (data && data.data && data.data.Page && data.data.Page.media) {
+//         return {
+//             ok: true,
+//             data: data
+//         };
+//     } else {
+//         // return {
+//         //     ok: false,
+//         //     error: 'Data recieved from Anilist is not in the expected format',
+//         //     data: null
+//         // }
+//         throw new Error('Data recieved from Anilist is not in the expected format');
+//     }
+// };
+
 const handleError = (error) => {
     console.log('Error after calling anilist occurred:', error);
 };
