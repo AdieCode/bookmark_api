@@ -188,6 +188,7 @@ const enrich = {
                 console.log('newItem ', JSON.stringify(newItem));
                 return newItem;
             });
+            console.log('formattedData ', JSON.stringify(formattedData));
             return formattedData;
         } catch (error) {
             throw new Error('Error adding tracked content data: ' + error.message);
