@@ -1,3 +1,4 @@
+const getData = require('../../api/data/get.js');
 const enrich = {
     enrichReadableContentData: function(currentData, neededData) {
     const mediaData = neededData.data.Page.media;
@@ -142,6 +143,46 @@ const enrich = {
         }
     },
 
+    addTrackedContentData: async function (content, user_id) {
+        if (!content || !Array.isArray(content)) {
+            throw new Error('Invalid content format - addTrackedContentData()');
+        };
+
+        const trackedContent = await new Promise((resolve, reject) => {
+            getData.getAllUserReadableContent(user_id, (error, data) => {
+                if (error) return reject(new Error('Error retrieving tracked content: ' + error.message));
+                resolve(data);
+            });
+        });
+
+            // Build a map for O(1) lookups
+        const trackedMap = {};
+        for (const item of trackedContent) {
+            trackedMap[item.anilist_id] = item;
+        }
+
+        try {
+            const formattedData = content.map(media => {
+
+                const trackedData = trackedMap[media.id];
+                const contentData = media;
+                return {...contentData,
+                    tracked: {
+                        personal_score: trackedData?.score || 0,
+                        current_volume: trackedData?.current_volume || 0,
+                        current_chapter: trackedData?.current_chapter || 0,
+                        current_page: trackedData?.current_page || 0,
+                        status: trackedData?.status || 'no status',
+                        user_comment: trackedData?.user_comment || 'no comment',
+                    }
+                }
+            });
+            return formattedData;
+        } catch (error) {
+            throw new Error('Error adding tracked content data: ' + error.message);
+        }
+    },
+
     convertToSendBackFormat: function(pageData, media) {
         try {
             const results = {
@@ -156,6 +197,6 @@ const enrich = {
             return error
             console.error('Error occurred:', error);
         }
-    }
+    },
 }
 module.exports = enrich;

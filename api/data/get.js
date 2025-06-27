@@ -71,6 +71,24 @@ const getData = {
         }
     },
 
+    getAllUserReadableContent: async function(user_id, callback) {
+        try {
+            const result = await BookmarkDB.query(
+                'SELECT * FROM readable_tracked_content WHERE user_id = $1',
+                [user_id]
+            );
+    
+            if (result.rows.length > 0) {
+                callback(null, result.rows);
+            } else {
+                callback(null, []);
+            }
+        } catch (error) {
+            console.error('Error retrieving readable content:', error);
+            callback(error, false);
+        }
+    },
+
     getUserReadableContent: async function(user_id, status, callback) {
         try {
             const result = await BookmarkDB.query(

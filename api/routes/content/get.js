@@ -26,7 +26,9 @@ router.get('/get_manga_content', async (req, res, next) => {
 
         const convertedFetchedResults = enrich.convertToStanderdContentFormat(fetchedData);
 
-        const results = enrich.convertToSendBackFormat(fetchedData.data.Page.pageInfo, convertedFetchedResults);
+        const enrichedWithTrackedData = enrich.addTrackedContentData(convertedFetchedResults, req?.user?.id);
+
+        const results = enrich.convertToSendBackFormat(fetchedData.data.Page.pageInfo, enrichedWithTrackedData);
         cache.set(cacheKey, results);
         res.json(results);
     } catch (error) {
