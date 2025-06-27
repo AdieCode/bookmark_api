@@ -155,6 +155,9 @@ const enrich = {
             });
         });
 
+        console.log('content amount: ', content.length);
+        console.log('track content amount: ', trackedContent.length);
+
             // Build a map for O(1) lookups
         const trackedMap = {};
         for (const item of trackedContent) {
