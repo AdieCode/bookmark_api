@@ -164,6 +164,8 @@ const enrich = {
             trackedMap[item.anilist_id] = item;
         }
 
+        console.log('track content amount: ', Object.keys(trackedMap).length);
+
         try {
             const formattedData = content.map(media => {
 
