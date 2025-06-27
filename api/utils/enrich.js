@@ -172,9 +172,9 @@ const enrich = {
                 const trackedData = trackedMap[media.anilist_content_id] || {};
                 const contentData = media;
 
-                console.log('content example: ', JSON.stringify(contentData));
-                console.log('track content example: ', JSON.stringify(trackedData));
-                return {...contentData,
+                // console.log('content example: ', JSON.stringify(contentData));
+                // console.log('track content example: ', JSON.stringify(trackedData));
+                const newItem = {...contentData,
                     tracked: {
                         personal_score: trackedData?.score || 0,
                         current_volume: trackedData?.current_volume || 0,
@@ -184,6 +184,9 @@ const enrich = {
                         user_comment: trackedData?.user_comment || 'no comment',
                     }
                 }
+
+                console.log('newItem ', JSON.stringify(newItem));
+                return newItem;
             });
             return formattedData;
         } catch (error) {
