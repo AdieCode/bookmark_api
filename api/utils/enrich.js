@@ -171,6 +171,9 @@ const enrich = {
 
                 const trackedData = trackedMap[media.id];
                 const contentData = media;
+
+                console.log('content example: ', JSON.stringify(contentData));
+                console.log('track content example: ', JSON.stringify(trackedData));
                 return {...contentData,
                     tracked: {
                         personal_score: trackedData?.score || 0,
