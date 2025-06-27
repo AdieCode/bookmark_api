@@ -169,7 +169,7 @@ const enrich = {
         try {
             const formattedData = content.map(media => {
 
-                const trackedData = trackedMap[media.id];
+                const trackedData = trackedMap[media.anilist_content_id];
                 const contentData = media;
 
                 console.log('content example: ', JSON.stringify(contentData));
