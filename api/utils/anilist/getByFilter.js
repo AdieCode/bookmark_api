@@ -3,6 +3,7 @@ const {
     handleAniListData,
     handleError 
 } = require("../externalResponseHandlers.js");
+const cache = require("../cache/cache.js");
 
 
 const mediaFormat = global.config.aniList.query.media; 
@@ -119,6 +120,14 @@ function buildAnimeQuery(filters, page) {
 }
 
 const getMangaContentFromAnilistByFilters = async (filters = {}, page = 1, perPage = 50, sort = 'POPULARITY_DESC') => {
+    const keyBase = JSON.stringify(filters);
+    const encodedFilters = encodeURIComponent(keyBase);
+    const cacheKey = `anilist-filter-content:${page}:${encodedFilters}`;
+
+    const cached = cache.get(cacheKey);
+    if (cached) {
+        return cached;
+    }
 
     const {query, variables} = buildMangaQuery(filters, page);
 
@@ -133,6 +142,7 @@ const getMangaContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
 
         const rawData = await handleAnilistResponse(response);
         const allData = handleAniListData(rawData);
+        cache.set(cacheKey, allData);
 
         return allData;
 

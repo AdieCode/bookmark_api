@@ -8,7 +8,7 @@ if (!isCacheEnabled) {
 
   // Return a dummy cache that does nothing
   const dummyCache = {
-    get: () => undefined,
+    get: () => null,
     set: () => {},
     delete: () => {},
     has: () => false,

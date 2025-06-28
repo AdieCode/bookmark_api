@@ -30,7 +30,7 @@ const enrich = {
         return enrichedDataResults;
     },
 
-    convertRelationsToStanderdContentFormat: function (content) {
+    convertRelationsToStanderdContentFormat: async function (content, req) {
         if (!content || !Array.isArray(content)) {
             throw new Error('Invalid content format');
         };
@@ -54,13 +54,16 @@ const enrich = {
                     relationType: media.relationType || 'no relationType',
                 };
             });
-            return formattedData;
+
+            const formattedDataEnriched = await this.addTrackedContentData(formattedData, req?.user?.id);
+
+            return formattedDataEnriched;
         } catch (error) {
             throw new Error('Error formatting relations: ' + error.message);
         }
     },
 
-    convertRecommendationsToStanderdContentFormat: function (content) {
+    convertRecommendationsToStanderdContentFormat: async function (content, req) {
         if (!content || !Array.isArray(content)) {
             throw new Error('Invalid content format');
         };
@@ -83,7 +86,10 @@ const enrich = {
                     status: recommendation?.status || 'no status',
                 };
             });
-            return formattedData;
+
+            const formattedDataEnriched = await this.addTrackedContentData(formattedData, req?.user?.id);
+
+            return formattedDataEnriched;
         } catch (error) {
             throw new Error('Error formatting recommendations: ' + error.message);
         }
@@ -111,14 +117,14 @@ const enrich = {
         }
     },
 
-    convertToStanderdContentFormat: function (contentData) {
+    convertToStanderdContentFormat: async function (contentData, req) {
 
         if (!contentData || !contentData.data || !contentData.data.Page || !Array.isArray(contentData.data.Page.media)) {
             throw new Error('Invalid contentData format');
         };
     
         try {
-            const formattedData = contentData.data.Page.media.map(media => ({
+            const formattedData = await Promise.all(contentData.data.Page.media.map(async(media) => ({
                 anilist_content_id: media.id,
                 title: media.title,
                 genres: media.genres,
@@ -132,12 +138,14 @@ const enrich = {
                 episodes: media.episodes || 0,
                 isAdult: media.isAdult,
                 status: media.status || 'no status',
-                relations: media.relations ? this.convertRelationsToStanderdContentFormat(media.relations.edges) : 'no relations found',
-                recommendations: media.recommendations ? this.convertRecommendationsToStanderdContentFormat(media.recommendations.edges) : 'no recommendations',
+                relations: media.relations ? await this.convertRelationsToStanderdContentFormat(media.relations.edges, req) : 'no relations found',
+                recommendations: media.recommendations ? await this.convertRecommendationsToStanderdContentFormat(media.recommendations.edges, req) : 'no recommendations',
                 characters: media.characters ? this.convertCharactersToStanderdContentFormat(media.characters.edges) : 'no characters found'
-            }));
+            })));
+
+            const formattedDataEnriched =  await this.addTrackedContentData(formattedData, req?.user?.id);
     
-            return formattedData;
+            return formattedDataEnriched;
         } catch (error) {
             throw new Error('Error formatting contentData : ' + error.message);
         }
@@ -148,47 +156,69 @@ const enrich = {
             throw new Error('Invalid content format - addTrackedContentData()');
         };
 
-        const trackedContent = await new Promise((resolve, reject) => {
+        const trackedReadableContent = await new Promise((resolve, reject) => {
             getData.getAllUserReadableContent(user_id, (error, data) => {
-                if (error) return reject(new Error('Error retrieving tracked content: ' + error.message));
+                if (error) return reject(new Error('Error retrieving readable tracked content: ' + error.message));
                 resolve(data);
             });
         });
 
-        console.log('content amount: ', content.length);
-        console.log('track content amount: ', trackedContent.length);
+        const trackedWatchableContent = await new Promise((resolve, reject) => {
+            getData.getAllUserWatchableContent(user_id, (error, data) => {
+                if (error) return reject(new Error('Error retrieving watchable tracked content: ' + error.message));
+                resolve(data);
+            });
+        });
+        console.log('trackedWatchableContent', trackedWatchableContent)
 
-            // Build a map for O(1) lookups
-        const trackedMap = {};
-        for (const item of trackedContent) {
-            trackedMap[item.anilist_id] = item;
+        const trackedReadableMap = {};
+        for (const item of trackedReadableContent) {
+            trackedReadableMap[item.anilist_id] = item;
         }
 
-        console.log('track content amount: ', Object.keys(trackedMap).length);
+        const trackedWatchableMap = {};
+        for (const item of trackedWatchableContent) {
+            trackedWatchableMap[item.anilist_id] = item;
+        }
 
         try {
             const formattedData = content.map(media => {
 
-                const trackedData = trackedMap[media.anilist_content_id] || {};
-                const contentData = media;
-
-                // console.log('content example: ', JSON.stringify(contentData));
-                // console.log('track content example: ', JSON.stringify(trackedData));
-                const newItem = {...contentData,
-                    tracked: {
-                        personal_score: trackedData?.score || 0,
-                        current_volume: trackedData?.current_volume || 0,
-                        current_chapter: trackedData?.current_chapter || 0,
-                        current_page: trackedData?.current_page || 0,
-                        status: trackedData?.status || 'no status',
-                        user_comment: trackedData?.user_comment || 'no comment',
+                if (media?.type === "MANGA") {
+                    const trackedData = trackedReadableMap[media.anilist_content_id] || {};
+    
+                    const newItem = {...media,
+                        tracked: {
+                            personal_score: trackedData?.score || 0,
+                            current_volume: trackedData?.current_volume || 0,
+                            current_chapter: trackedData?.current_chapter || 0,
+                            current_page: trackedData?.current_page || 0,
+                            status: trackedData?.status || 'UNTRACKED',
+                            user_comment: trackedData?.user_comment || 'no comment',
+                        }
                     }
+
+                    return newItem;
+                } else {
+                    const trackedData = trackedWatchableMap[media.anilist_content_id] || {};
+                    // console.log(JSON.stringify(trackedData))
+    
+                    const newItem = {...media,
+                        tracked: {
+                            personal_score: trackedData?.score || 0,
+                            current_episode: trackedData?.current_episode || 0,
+                            status: trackedData?.status || 'UNTRACKED',
+                            user_comment: trackedData?.user_comment || 'no comment',
+                        }
+                    }
+                    
+                    return newItem;
+
                 }
 
-                console.log('newItem ', JSON.stringify(newItem));
-                return newItem;
+
+
             });
-            console.log('formattedData ', JSON.stringify(formattedData));
             return formattedData;
         } catch (error) {
             throw new Error('Error adding tracked content data: ' + error.message);

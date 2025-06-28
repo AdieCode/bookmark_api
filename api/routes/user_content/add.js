@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const addData = require('../../data/add.js');
+const cache = require("../../utils/cache/cache.js");
 
 router.post('/add_user_manga_content', async (req, res) => { 
     console.log('add_user_manga_content : ', req.user);
@@ -35,6 +36,9 @@ router.post('/add_user_manga_content', async (req, res) => {
             if (!response) {
                 return res.status(409).json({success: true, message: 'User content was already added'});
             } else {
+                const cacheKey = `user-tracked-content-readable:${data.user_id}`;
+
+                cache.delete(cacheKey);
                 return res.status(200).json({success: true, message: 'User content was added succesfully'});
             }
             

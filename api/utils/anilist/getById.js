@@ -3,6 +3,7 @@ const {
     handleAniListData,
     handleError 
 } = require("../externalResponseHandlers.js");
+const cache = require("../cache/cache.js");
 
 // const query = global.config.aniList.query.getContentById; 
 const url =   global.config.aniList.baseUrl;
@@ -42,8 +43,18 @@ const query = `
 
 
 const getContentFromAnilistById = async (id) => {
+
     if (!id) {
         throw new Error('ID is required to fetch content');
+    }
+
+    const cacheKey = `anilist-content-by-id:${id}`;
+
+    const cached = cache.get(cacheKey);
+    
+    if (cached) {
+        console.log('Cache hit for key:', cacheKey);
+        return cached;
     }
 
     const variables = {
@@ -60,7 +71,9 @@ const getContentFromAnilistById = async (id) => {
         });
         
         const data = await handleAnilistResponse(response);
-        return handleAniListData(data);
+        const handledData = handleAniListData(data);
+        cache.set(cacheKey, handledData);
+        return handledData;
     } catch (error) {
         handleError(error);
         throw error;

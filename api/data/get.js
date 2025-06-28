@@ -1,5 +1,6 @@
 const BookmarkDB = require('./pool.js');
 const { checkPassword } = require('../utils/Oauth/auth.js');
+const cache = require("../../api/utils/cache/cache.js");
 
 
 const getData = {
@@ -72,6 +73,16 @@ const getData = {
     },
 
     getAllUserReadableContent: async function(user_id, callback) {
+
+        const cacheKey = `user-tracked-content-readable:${user_id}`;
+
+        const cached = cache.get(cacheKey);
+        
+        if (cached) {
+            console.log('Cache hit for key:', cacheKey);
+            callback(null, cached);
+        }
+
         try {
             const result = await BookmarkDB.query(
                 'SELECT * FROM readable_tracked_content WHERE user_id = $1',
@@ -79,12 +90,42 @@ const getData = {
             );
     
             if (result.rows.length > 0) {
+                cache.set(cacheKey, result.rows);
                 callback(null, result.rows);
             } else {
                 callback(null, []);
             }
         } catch (error) {
-            console.error('Error retrieving readable content:', error);
+            console.error('Error retrieving user readable content:', error);
+            callback(error, false);
+        }
+    },
+
+    getAllUserWatchableContent: async function(user_id, callback) {
+
+        const cacheKey = `user-tracked-content-watchable:${user_id}`;
+
+        const cached = cache.get(cacheKey);
+        
+        if (cached) {
+            console.log('Cache hit for key:', cacheKey);
+            callback(null, cached);
+        }
+
+        try {
+            const result = await BookmarkDB.query(
+                'SELECT * FROM watchable_tracked_content WHERE user_id = $1',
+                [user_id]
+            );
+    
+            if (result.rows.length > 0) {
+                cache.set(cacheKey, result.rows);
+                callback(null, result.rows);
+            } else {
+                callback(null, []);
+            }
+        } catch (error) {
+            console.error('Error retrieving user watchable content:', error);
             callback(error, false);
         }
     },
@@ -102,25 +143,25 @@ const getData = {
                 callback('No content found for this user ID and status', null);
             }
         } catch (error) {
-            console.error('Error retrieving readable content:', error);
+            console.error('Error retrieving user readable content:', error);
             callback(error, false);
         }
     },
     
-    getUserWatchableContent: async function(user_id, callback) {
+    getUserWatchableContent: async function(user_id, status, callback) {
         try {
             const result = await BookmarkDB.query(
-                'SELECT user_id, content_id, current_season, current_episode, personal_score, status FROM user_watchable_content WHERE user_id = $1',
-                [user_id]
+                'SELECT * FROM watchable_tracked_content WHERE user_id = $1 AND status = $2',
+                [user_id, status]
             );
     
             if (result.rows.length > 0) {
                 callback(null, result.rows);
             } else {
-                callback('No content found for this user ID', null);
+                callback('No content found for this user ID and status', null);
             }
         } catch (error) {
-            console.error('Error retrieving readable content:', error);
+            console.error('Error retrieving user watchable content:', error);
             callback(error, false);
         }
     },  

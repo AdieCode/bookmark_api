@@ -1,6 +1,6 @@
 cache:
     enabled: true
-    size: 2000
+    size: 3000
     expirationMinutes: 10  # 10 minutes
     ResetTtlPerAccess: false
 
@@ -8,7 +8,7 @@ cache:
 aniList:
     baseUrl: https://graphql.anilist.co
     options:
-        isAdult: false
+        isAdult: true
     query:
         media: |
             id

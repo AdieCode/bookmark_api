@@ -37,8 +37,8 @@ router.get('/get_user_manga_content', async (req, res) => {
                 }   
             })
     
-            const fetcedData = await getContentFromAnilistByIdList(idList)
-            const convertedFecthedResults = enrich.convertToStanderdContentFormat(fetcedData)
+            const fetcedData = await getContentFromAnilistByIdList(idList);
+            const convertedFecthedResults = await enrich.convertToStanderdContentFormat(fetcedData, req)
             const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
         
             res.json(results); 
@@ -52,7 +52,48 @@ router.get('/get_user_manga_content', async (req, res) => {
 });
 
 router.get('/get_user_anime_content', async (req, res) => { 
-    return res.status(500).json({success: true, message: 'nothing to get for now'});
+
+    const user_id = req?.user?.id;
+    const status = req.query?.content_status;
+
+    try {
+        let userContent = [];
+        let idList = [];
+
+        if (!user_id || !['planning', 'busy', 'completed'].includes(status)) {
+            console.log('Error occurred: Invalid param user_id or status');
+            return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: 'data sent was incorrect' });
+        }
+
+        getData.getUserReadableContent(user_id, status, async (error, response) => {
+            if (error) {
+                throw new Error(error)
+            }
+
+            if (Array.isArray(response)) {
+                userContent = response;     
+            } else {
+                throw new Error('Expected an array but got:', yourVariable);
+            }
+
+            userContent.forEach((content) => {
+                if (content?.anilist_id) {
+                    idList.push(content.anilist_id);
+                }   
+            })
+    
+            const fetcedData = await getContentFromAnilistByIdList(idList);
+            const convertedFecthedResults = await enrich.convertToStanderdContentFormat(fetcedData, req)
+            const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
+        
+            res.json(results); 
+        })
+
+        
+    } catch (error) {
+        console.error('Error occurred /get_user_anime_content:', error);
+        return res.status(500).json({success: false, message: 'Internal server error' });
+    }
 });
 
 module.exports = router;
