@@ -69,7 +69,7 @@ const getContentFromAnilistById = async (id) => {
         const response = await fetch(url, {
             ...options,
             body: JSON.stringify({
-                query: query+'e',
+                query: query,
                 variables: variables
             })
         });
