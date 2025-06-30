@@ -79,7 +79,6 @@ const getData = {
         const cached = cache.get(cacheKey);
         
         if (cached) {
-            console.log('Cache hit for key:', cacheKey);
             callback(null, cached);
         }
 
@@ -108,7 +107,6 @@ const getData = {
         const cached = cache.get(cacheKey);
         
         if (cached) {
-            console.log('Cache hit for key:', cacheKey);
             callback(null, cached);
         }
 

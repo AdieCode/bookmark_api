@@ -169,7 +169,6 @@ const enrich = {
                 resolve(data);
             });
         });
-        console.log('trackedWatchableContent', trackedWatchableContent)
 
         const trackedReadableMap = {};
         for (const item of trackedReadableContent) {
