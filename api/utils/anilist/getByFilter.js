@@ -4,6 +4,7 @@ const {
     handleError 
 } = require("../externalResponseHandlers.js");
 const cache = require("../cache/cache.js");
+const { all } = require("axios");
 
 
 const mediaFormat = global.config.aniList.query.media; 
@@ -122,7 +123,7 @@ function buildAnimeQuery(filters, page) {
 const getMangaContentFromAnilistByFilters = async (filters = {}, page = 1, perPage = 50, sort = 'POPULARITY_DESC') => {
     const keyBase = JSON.stringify(filters);
     const encodedFilters = encodeURIComponent(keyBase);
-    const cacheKey = `anilist-filter-content:${page}:${encodedFilters}`;
+    const cacheKey = `anilist-filter-content-manga:${page}:${encodedFilters}`;
 
     const cached = cache.get(cacheKey);
     if (cached) {
@@ -153,6 +154,14 @@ const getMangaContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
 };
 
 const getAnimeContentFromAnilistByFilters = async (filters = {}, page = 1, perPage = 50, sort = 'POPULARITY_DESC') => {
+    const keyBase = JSON.stringify(filters);
+    const encodedFilters = encodeURIComponent(keyBase);
+    const cacheKey = `anilist-filter-content-manga:${page}:${encodedFilters}`;
+
+    const cached = cache.get(cacheKey);
+    if (cached) {
+        return cached;
+    }
 
     const {query, variables} = buildAnimeQuery(filters, page);
 
@@ -166,8 +175,11 @@ const getAnimeContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
             })
         });
 
-        const data = await handleAnilistResponse(response);
-        return handleAniListData(data);
+        const rawData = await handleAnilistResponse(response);
+        const allData = handleAniListData(rawData);
+        cache.set(cacheKey, allData);
+        
+        return allData;
     } catch (error) {
         handleError(error);
         return {};
