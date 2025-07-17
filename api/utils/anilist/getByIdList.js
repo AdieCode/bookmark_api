@@ -18,8 +18,8 @@ const options = {
 const mediaFormat = global.config.aniList.query.media; 
 
 const query = `
-    query ($id_in: [Int]) {
-        Page {
+    query ($id_in: [Int], $page: Int, $perPage: Int) {
+        Page (page: $page, perPage: $perPage){
             pageInfo { 
                 total 
                 currentPage 
@@ -35,14 +35,16 @@ const query = `
 `;
 
 
-const getContentFromAnilistByIdList = async (idList) => {
+const getContentFromAnilistByIdList = async (idList,  page = 1, perPage = 100, sort = 'POPULARITY_DESC') => {
     if (!idList) {
         throw new Error('ID list is required to fetch content');
     }
     console.log('getContentFromAnilistByIdList called with idList:', idList);
 
     const variables = {
-        id_in: idList
+        id_in: idList,
+        page: page,                 
+        perPage: perPage,
     };
 
     try {
