@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const qs = require('querystring');
+const httpStatus = require('../responseTools/httpStatus.js');
 require('dotenv').config(); 
 
 const idCheck = require('./idCheck.js'); // Import the idCheck module
@@ -48,10 +49,10 @@ const isAuthenticated = (req, res, next) => {
         const authHeader = req?.headers?.authorization;
         
         if(!authHeader){
-            return res.status(401).json({ auth: false, error: 'Token not provided' });
+            return res.status(httpStatus.UNAUTHORIZED).json({ auth: false, error: 'Token not provided' });
             
         } else if(!authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({ auth: false, error: 'invalid token provided, Bearer is missing ' });
+            return res.status(httpStatus.UNAUTHORIZED).json({ auth: false, error: 'invalid token provided, Bearer is missing ' });
         }
     
         const token = authHeader.replace('Bearer ', '');
@@ -59,7 +60,7 @@ const isAuthenticated = (req, res, next) => {
         jwt.verify(token, secret, (err, decoded) => {
             if (err) {
                 console.error(err)
-                return res.status(401).json({ auth: false, error: 'Unauthorized, you are not authorized to access this endpoint' });
+                return res.status(httpStatus.UNAUTHORIZED).json({ auth: false, error: 'Unauthorized, you are not authorized to access this endpoint' });
             }
             req.user = decoded;
             next();
@@ -67,7 +68,7 @@ const isAuthenticated = (req, res, next) => {
 
     } catch (error) {
         console.log("Error occurred :", error)
-        return res.status(500).json({ auth: false, error: 'No token provided' });
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ auth: false, error: 'No token provided' });
     }
 };
 
@@ -76,7 +77,7 @@ const googleOAuth = async (req, res) => {
     const code = req.query.code;
     
     if (!code) {
-        return res.status(400).json({ error: 'Code not provided' });
+        return res.status(httpStatus.BAD_REQUEST).json({ error: 'Code not provided' });
     }
 
     try {
@@ -100,7 +101,7 @@ const googleOAuth = async (req, res) => {
         const { access_token, id_token } = tokenResponse.data;
 
         if (!access_token || !id_token) {
-            return res.status(400).json({ error: 'Unable to authenticate with Google' });
+            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Unable to authenticate with Google' });
         }
 
         // Use the id_token to get user details from Google
@@ -129,7 +130,7 @@ const googleOAuth = async (req, res) => {
 
     } catch (error) {
         console.error('Google OAuth error:', error.response?.data || error.message);
-        res.status(500).json({ error: 'Failed to authenticate with Google' });
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Failed to authenticate with Google' });
     }
 };
 
@@ -139,7 +140,7 @@ const githubOAuth = async (req, res) => {
     const code = req.query.code;
     
     if (!code) {
-        return res.status(400).json({ error: 'Code not provided' });
+        return res.status(httpStatus.BAD_REQUEST).json({ error: 'Code not provided' });
     }
 
     try {
@@ -162,7 +163,7 @@ const githubOAuth = async (req, res) => {
         const accessToken = tokenResponse.data.access_token;
 
         if (!accessToken) {
-            return res.status(400).json({ error: 'Unable to authenticate with GitHub' });
+            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Unable to authenticate with GitHub' });
         }
 
         // Use the access token to get user details from GitHub
@@ -191,7 +192,7 @@ const githubOAuth = async (req, res) => {
 
     } catch (error) {
         console.error('GitHub OAuth error:', error.response?.data || error.message);
-        res.status(500).json({ error: 'Failed to authenticate with GitHub' });
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Failed to authenticate with GitHub' });
     }
 };
 
