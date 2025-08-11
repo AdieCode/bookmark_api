@@ -9,6 +9,7 @@ router.get('/get_user_manga_content', async (req, res) => {
 
     const user_id = req?.user?.id;
     const status = req.query?.content_status;
+    const page = req.query?.page || 1;
 
     try {
         let userContent = [];
@@ -37,7 +38,7 @@ router.get('/get_user_manga_content', async (req, res) => {
                 }   
             })
     
-            const fetcedData = await getContentFromAnilistByIdList(idList);
+            const fetcedData = await getContentFromAnilistByIdList(idList, page);
             const convertedFecthedResults = await enrich.convertToStanderdContentFormat(fetcedData, req)
             const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
         
@@ -55,6 +56,7 @@ router.get('/get_user_anime_content', async (req, res) => {
 
     const user_id = req?.user?.id;
     const status = req.query?.content_status;
+    const page = req.query?.page || 1;
 
     try {
         let userContent = [];
@@ -82,7 +84,7 @@ router.get('/get_user_anime_content', async (req, res) => {
                 }   
             })
     
-            const fetcedData = await getContentFromAnilistByIdList(idList);
+            const fetcedData = await getContentFromAnilistByIdList(idList, page);
             const convertedFecthedResults = await enrich.convertToStanderdContentFormat(fetcedData, req)
             const results = enrich.convertToSendBackFormat(fetcedData.data.Page.pageInfo, convertedFecthedResults)
         
