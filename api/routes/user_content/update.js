@@ -7,9 +7,11 @@ router.post('/update_user_manga_content', (req, res, next) => {
     const data = {
         user_id: req?.user?.id,
         anilist_id: req?.body?.content_id,
-        current_episode: req?.body?.current_episode,
+        current_volume: req?.body?.current_volume,
+        current_chapter: req?.body?.current_chapter,
+        current_page: req?.body?.current_page,
         score: req?.body?.personal_score,
-        status: req?.body?.content_status,
+        status: req?.body?.status,
         start_date: req?.body?.start_date,
         end_date: req?.body?.end_date,
         user_comment: req?.body?.user_comment,
