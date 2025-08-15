@@ -138,7 +138,7 @@ const getData = {
             if (result.rows.length > 0) {
                 callback(null, result.rows);
             } else {
-                callback('No content found for this user ID and status', null);
+                callback(null, []);
             }
         } catch (error) {
             console.error('Error retrieving user readable content:', error);
@@ -156,7 +156,7 @@ const getData = {
             if (result.rows.length > 0) {
                 callback(null, result.rows);
             } else {
-                callback('No content found for this user ID and status', null);
+                callback(null, []);
             }
         } catch (error) {
             console.error('Error retrieving user watchable content:', error);
