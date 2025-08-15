@@ -50,7 +50,7 @@ router.post('/update_user_anime_content', (req, res, next) => {
         anilist_id: req?.body?.content_id,
         current_episode: req?.body?.current_episode,
         score: req?.body?.personal_score,
-        status: req?.body?.content_status,
+        status: req?.body?.status,
         start_date: req?.body?.start_date,
         end_date: req?.body?.end_date,
         user_comment: req?.body?.user_comment,
