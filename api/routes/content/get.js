@@ -143,20 +143,10 @@ router.post('/get_anime_content_by_filters', async (req, res, next) => {
         return res.status(400).json({ error: 'filters are required' });
     }
 
-    const keyBase = JSON.stringify(filters);
-    const encodedFilters = encodeURIComponent(keyBase);
-    const cacheKey = `anime-content:${page}:${encodedFilters}`;
-
-    const cached = cache.get(cacheKey);
-    if (cached) {
-        return res.json(cached);
-    }
-
     try {
         let fetchedData = await getAnimeContentFromAnilistByFilters(filters, page); 
         const convertedFecthedResults = await enrich.convertToStanderdContentFormat(fetchedData, req)  
         const results = enrich.convertToSendBackFormat(fetchedData.data.Page.pageInfo, convertedFecthedResults)
-        cache.set(cacheKey, results);
         res.json(results); 
     } catch (error) {
         console.error('Error occurred /get_content_by_filters:', error);
