@@ -67,7 +67,7 @@ router.get('/get_user_anime_content', async (req, res) => {
             return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: 'data sent was incorrect' });
         }
 
-        getData.getUserReadableContent(user_id, status, async (error, response) => {
+        getData.getUserWatchableContent(user_id, status, async (error, response) => {
             if (error) {
                 throw new Error(error)
             }
