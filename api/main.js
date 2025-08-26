@@ -75,7 +75,7 @@ app.use(morgan(function (tokens, req, res) {
 	const separator = '='.repeat(firstString.length + 4);
 
 	return [
-		`${separator} \n`,
+		`REQUEST RECIEVED\n${separator} \n`,
 		firstString,
 		'\n\nRequest Headers:',
 		tokens['request-headers'](req, res), // This will print the request headers in formatted JSON
@@ -83,7 +83,7 @@ app.use(morgan(function (tokens, req, res) {
 		tokens['request-body'](req, res),    // This will print the request body in formatted JSON
 		// '\n\nResponse Body:',
 		// tokens['response-body'](req, res),   // This will print the response body in formatted JSON
-		"\n",
+		"\n${separator}\n",
 	].join(' ');
 }, {
 	skip: function (req, res) { return req.method === 'OPTIONS'; }
