@@ -83,7 +83,7 @@ app.use(morgan(function (tokens, req, res) {
 		tokens['request-body'](req, res),    // This will print the request body in formatted JSON
 		// '\n\nResponse Body:',
 		// tokens['response-body'](req, res),   // This will print the response body in formatted JSON
-		"\n${separator}\n",
+		"\n" + separator + "\n",
 	].join(' ');
 }, {
 	skip: function (req, res) { return req.method === 'OPTIONS'; }
