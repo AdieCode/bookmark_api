@@ -39,8 +39,6 @@ const getContentFromAnilistByIdList = async (idList,  page = 1, perPage = 100, s
     if (!idList) {
         throw new Error('ID list is required to fetch content');
     }
-    console.log('getContentFromAnilistByIdList called with idList:', idList);
-    console.log('Parameters: ', `page: ${page}, perPage: ${perPage}, sort: ${sort}`);
 
     const variables = {
         id_in: idList,
