@@ -1,7 +1,6 @@
 const BookmarkDB = require('./pool.js');
-const { checkPassword } = require('../utils/Oauth/auth.js');
+const { checkPassword } = require('../utils/passwordUtils.js');
 const cache = require("../../api/utils/cache/cache.js");
-
 
 const getData = {
     // checks if username already exists
@@ -31,6 +30,12 @@ const getData = {
             if (err) {
                 console.error('Error checking login credentials:', err);
                 callback(err, false);
+                return;
+            }
+
+            if (!checkPassword) {
+                console.error('checkPassword function is undefined');
+                callback(new Error('Authentication system error'), false);
                 return;
             }
             

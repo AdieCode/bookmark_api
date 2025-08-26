@@ -1,8 +1,8 @@
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const qs = require('querystring');
 const httpStatus = require('../responseTools/httpStatus.js');
+const { hashPassword, checkPassword } = require('../passwordUtils.js');
 require('dotenv').config(); 
 
 const idCheck = require('./idCheck.js'); // Import the idCheck module
@@ -17,32 +17,6 @@ const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI; // Google OAuth callb
 const githubClientId = process.env.GITHUB_CLIENT_ID;
 const githubClientSecret = process.env.GITHUB_CLIENT_SECRET;
 const githubRedirectUri = process.env.GITHUB_REDIRECT_URI; // This should match what you set in GitHub OAuth settings
-
-async function hashPassword(password) {
-    try {
-        const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(password, salt);
-        return hash;
-    } catch (error) {
-        console.error('Error hashing password:', error);
-        throw error;
-    }
-}
-
-async function checkPassword(inputPassword, hashedPassword) {
-    try {
-        const match = await bcrypt.compare(inputPassword, hashedPassword);
-        if (match) {
-            return true;
-    
-        } else {
-            return false;
-        }
-    } catch (error) {
-        console.error('Error comparing passwords:', error);
-        return false;
-    }
-}
 
 const isAuthenticated = (req, res, next) => {
     try {
