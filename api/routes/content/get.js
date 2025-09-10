@@ -30,11 +30,13 @@ router.get('/get_manga_content', async (req, res, next) => {
 
 router.post('/get_manga_content_specific', async (req, res, next) => {
     const search = req.body.search;
+    const page = req.body?.page || 1;
+    const perPage = req.body?.perPage || 5;
     try {
-        let fetchedData = await getContentFromAnilist("MANGA", search, 1, 5);
-        const convertedFecthedResults = await enrich.convertToStanderdContentFormat(fetchedData, req) 
-        const results = enrich.convertToSendBackFormat(fetchedData.data.Page.pageInfo, convertedFecthedResults)
-        res.json(results); 
+        let fetchedData = await getContentFromAnilist("MANGA", search, page, perPage);
+        const convertedFetchedResults = await enrich.convertToStanderdContentFormat(fetchedData, req);
+        const results = enrich.convertToSendBackFormat(fetchedData.data.Page.pageInfo, convertedFetchedResults);
+        res.json(results);
     } catch (error) {
         console.error('Error occurred /get_manga_content_specific:', error);
         next(error);
@@ -107,10 +109,13 @@ router.get('/get_anime_content_by_id', async (req, res, next) => {
 
 router.get('/get_content_by_search', async (req, res, next) => { 
     const search = req.query.search;
+    const page = req.query?.page || 1;
+    const perPage = req.query?.perPage || 5;
+
     try {
-        let fetchedData = await getContentBySearch(search, 1, 5); 
-        const convertedFecthedResults = await enrich.convertToStanderdContentFormat(fetchedData, req)  
-        const results = enrich.convertToSendBackFormat(fetchedData.data.Page.pageInfo, convertedFecthedResults)
+        let fetchedData = await getContentBySearch(search, page, perPage); 
+        const convertedFetchedResults = await enrich.convertToStanderdContentFormat(fetchedData, req)  
+        const results = enrich.convertToSendBackFormat(fetchedData.data.Page.pageInfo, convertedFetchedResults)
         res.json(results); 
     } catch (error) {
         console.error('Error occurred /get_content_by_search:', error);
