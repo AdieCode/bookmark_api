@@ -205,6 +205,65 @@ const getData = {
         }
     },    
 
+    getUserContentCounts: async function(user_id, callback) {
+        try {
+            // Get readable content counts (manga)
+            const readableCountsResult = await BookmarkDB.query(`
+                SELECT 
+                    COUNT(*) as total_count,
+                    COUNT(CASE WHEN status = 'planning' THEN 1 END) as planning_count,
+                    COUNT(CASE WHEN status = 'busy' THEN 1 END) as busy_count,
+                    COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_count
+                FROM readable_tracked_content 
+                WHERE user_id = $1 AND (deleted IS NULL OR deleted = false)
+            `, [user_id]);
+
+            // Get watchable content counts (anime)
+            const watchableCountsResult = await BookmarkDB.query(`
+                SELECT 
+                    COUNT(*) as total_count,
+                    COUNT(CASE WHEN status = 'planning' THEN 1 END) as planning_count,
+                    COUNT(CASE WHEN status = 'busy' THEN 1 END) as busy_count,
+                    COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_count
+                FROM watchable_tracked_content 
+                WHERE user_id = $1 AND (deleted IS NULL OR deleted = false)
+            `, [user_id]);
+
+            const readableCounts = readableCountsResult.rows[0] || {
+                total_count: 0,
+                planning_count: 0,
+                busy_count: 0,
+                completed_count: 0
+            };
+
+            const watchableCounts = watchableCountsResult.rows[0] || {
+                total_count: 0,
+                planning_count: 0,
+                busy_count: 0,
+                completed_count: 0
+            };
+
+            const result = {
+                manga: {
+                    totalCount: parseInt(readableCounts.total_count),
+                    planningCount: parseInt(readableCounts.planning_count),
+                    busyCount: parseInt(readableCounts.busy_count),
+                    completedCount: parseInt(readableCounts.completed_count)
+                },
+                anime: {
+                    totalCount: parseInt(watchableCounts.total_count),
+                    planningCount: parseInt(watchableCounts.planning_count),
+                    busyCount: parseInt(watchableCounts.busy_count),
+                    completedCount: parseInt(watchableCounts.completed_count)
+                }
+            };
+
+            callback(null, result);
+        } catch (error) {
+            console.error('Error retrieving user content counts:', error);
+            callback(error, null);
+        }
+    },
 
     getAllRows: async function(tableName) {
         try {

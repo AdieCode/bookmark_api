@@ -98,4 +98,40 @@ router.get('/get_user_anime_content', async (req, res) => {
     }
 });
 
+router.get('/user_content_count', async (req, res) => {
+    const user_id = req?.user?.id;
+
+    try {
+        if (!user_id) {
+            console.log('Error occurred: Invalid user_id');
+            return res.status(httpStatus.BAD_REQUEST).json({ 
+                success: false, 
+                message: 'User ID is required' 
+            });
+        }
+
+        getData.getUserContentCounts(user_id, (error, counts) => {
+            if (error) {
+                console.error('Error occurred /user_content_count:', error);
+                return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+                    success: false, 
+                    message: 'Internal server error' 
+                });
+            }
+
+            res.json({
+                success: true,
+                data: counts
+            });
+        });
+
+    } catch (error) {
+        console.error('Error occurred in /user_content_count:', error);
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            success: false, 
+            message: 'Internal server error' 
+        });
+    }
+});
+
 module.exports = router;
