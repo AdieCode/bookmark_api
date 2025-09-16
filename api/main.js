@@ -49,8 +49,8 @@ function trackEvent(req, res, next) {
 		url: req.originalUrl,
 		properties: {
 			method: req.method,
-			path: req.path,
-			route: req.route?.path,
+			path: req.originalUrl.split('?')[0], // Use originalUrl to get the full path without query params
+			route: req.route?.path || '',
 			query: req.query || 'not data available',
 			body: req.body || 'not data available',
 			response_body: res._responseBody || 'not data available',
