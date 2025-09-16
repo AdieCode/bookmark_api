@@ -3,6 +3,7 @@ const {
     handleAniListData,
     handleError 
 } = require("../externalResponseHandlers.js");
+const posthog = require("../posthog");
 
 // const query = global.config.aniList.query.getContentById; 
 const url =   global.config.aniList.baseUrl;
@@ -47,19 +48,62 @@ const getContentFromAnilistByIdList = async (idList,  page = 1, perPage = 100, s
     };
 
     try {
+        const startTime = Date.now();
+        const requestBody = JSON.stringify({
+            query: query,
+            variables: variables
+        });
+        
         const response = await fetch(url, {
             ...options,
-            body: JSON.stringify({
-                query: query,
-                variables: variables
-            })
+            body: requestBody
         });
 
-        
+        const duration = Date.now() - startTime;
         const data = await handleAnilistResponse(response);
-        // console.log('Response from AniList:', data.status, JSON.stringify(data));
+        
+        // Track the API call in PostHog
+        posthog.capture({
+            distinctId: 'BookmarkAPI_Server',
+            event: 'anilist_api_call',
+            properties: {
+                operation: 'getContentFromAnilistByIdList',
+                method: 'POST',
+                request_headers: options.headers,
+                request_body: {
+                    id_list: variables.id_in,
+                    id_count: variables.id_in.length,
+                    page: variables.page,
+                    perPage: variables.perPage
+                },
+                response_status: response.status,
+                response_ok: response.ok,
+                duration_ms: duration,
+                success: true
+            }
+        });
+        
         return handleAniListData(data);
     } catch (error) {
+        // Track the API call error in PostHog
+        posthog.capture({
+            distinctId: 'BookmarkAPI_Server',
+            event: 'anilist_api_call',
+            properties: {
+                operation: 'getContentFromAnilistByIdList',
+                method: 'POST',
+                request_body: {
+                    id_list: variables.id_in,
+                    id_count: variables.id_in.length,
+                    page: variables.page,
+                    perPage: variables.perPage
+                },
+                error_message: error.message,
+                error_stack: error.stack,
+                success: false
+            }
+        });
+        
         handleError(error);
         throw error;
     }

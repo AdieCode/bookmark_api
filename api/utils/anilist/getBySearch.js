@@ -3,6 +3,7 @@ const {
     handleAniListData,
     handleError 
 } = require("../externalResponseHandlers.js");
+const posthog = require("../posthog");
 
 const url =   global.config.aniList.baseUrl; 
 const options = {
@@ -41,22 +42,69 @@ const getContentBySearch = async (searchTerm = null, page = 1, perPage = 100, so
     };
 
     try {
-        const response = await fetch(url, {
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Cache-Control': 'no-cache' // Prevent cached responses
-            },
-            body: JSON.stringify({
-                query: query,
-                variables: variables
-            })
+        const startTime = Date.now();
+        const requestHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache' // Prevent cached responses
+        };
+        
+        const requestBody = JSON.stringify({
+            query: query,
+            variables: variables
         });
         
+        const response = await fetch(url, {
+            ...options,
+            headers: requestHeaders,
+            body: requestBody
+        });
+        
+        const duration = Date.now() - startTime;
         const data = await handleAnilistResponse(response);
+        
+        // Track the API call in PostHog
+        posthog.capture({
+            distinctId: 'BookmarkAPI_Server',
+            event: 'anilist_api_call',
+            properties: {
+                operation: 'getContentBySearch',
+                method: 'POST',
+                request_headers: requestHeaders,
+                request_body: {
+                    search: variables.search,
+                    page: variables.page,
+                    perPage: variables.perPage,
+                    sort: variables.sort
+                },
+                response_status: response.status,
+                response_ok: response.ok,
+                duration_ms: duration,
+                success: true
+            }
+        });
+        
         return handleAniListData(data);
     } catch (error) {
+        // Track the API call error in PostHog
+        posthog.capture({
+            distinctId: 'BookmarkAPI_Server',
+            event: 'anilist_api_call',
+            properties: {
+                operation: 'getContentBySearch',
+                method: 'POST',
+                request_body: {
+                    search: variables.search,
+                    page: variables.page,
+                    perPage: variables.perPage,
+                    sort: variables.sort
+                },
+                error_message: error.message,
+                error_stack: error.stack,
+                success: false
+            }
+        });
+        
         handleError(error); 
         return {}
     }

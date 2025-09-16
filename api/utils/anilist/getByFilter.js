@@ -4,6 +4,7 @@ const {
     handleError 
 } = require("../externalResponseHandlers.js");
 const cache = require("../cache/cache.js");
+const posthog = require("../posthog");
 const { all } = require("axios");
 
 
@@ -127,24 +128,69 @@ const getMangaContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
 
     const cached = cache.get(cacheKey);
     if (cached) {
+        // Track cache hit in PostHog
+        posthog.capture({
+            distinctId: 'BookmarkAPI_Server',
+            event: 'anilist_api_call',
+            properties: {
+                operation: 'getMangaContentFromAnilistByFilters',
+                method: 'CACHE',
+                request_body: {
+                    filters: filters,
+                    page: page,
+                    perPage: perPage
+                },
+                response_status: 200,
+                response_ok: true,
+                duration_ms: 0,
+                success: true,
+                cached: true
+            }
+        });
         return cached;
     }
 
     const {query, variables} = buildMangaQuery(filters, page);
 
     try {
+        const startTime = Date.now();
+        const requestBody = JSON.stringify({
+            query: query,
+            variables: variables
+        });
+        
         const response = await fetch(url, {
             ...options,
-            body: JSON.stringify({
-                query: query,
-                variables: variables
-            })
+            body: requestBody
         });
 
+        const duration = Date.now() - startTime;
         const rawData = await handleAnilistResponse(response);
         const allData = handleAniListData(rawData);
+        
+        // Track the API call in PostHog
+        posthog.capture({
+            distinctId: 'BookmarkAPI_Server',
+            event: 'anilist_api_call',
+            properties: {
+                operation: 'getMangaContentFromAnilistByFilters',
+                method: 'POST',
+                request_headers: options.headers,
+                request_body: {
+                    filters: Object.keys(filters),
+                    page: variables.page,
+                    perPage: variables.perPage,
+                    filter_count: Object.keys(filters).length
+                },
+                response_status: response.status,
+                response_ok: response.ok,
+                duration_ms: duration,
+                success: true,
+                cached: false
+            }
+        });
+        
         cache.set(cacheKey, allData);
-
         return allData;
 
     } catch (error) {
@@ -160,6 +206,25 @@ const getAnimeContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
 
     const cached = cache.get(cacheKey);
     if (cached) {
+        // Track cache hit in PostHog
+        posthog.capture({
+            distinctId: 'BookmarkAPI_Server',
+            event: 'anilist_api_call',
+            properties: {
+                operation: 'getAnimeContentFromAnilistByFilters',
+                method: 'CACHE',
+                request_body: {
+                    filters: filters,
+                    page: page,
+                    perPage: perPage
+                },
+                response_status: 200,
+                response_ok: true,
+                duration_ms: 0,
+                success: true,
+                cached: true
+            }
+        });
         return cached;
     }
 
@@ -167,20 +232,65 @@ const getAnimeContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
 
     try {
         console.log('calling anilist api for anime');
+        const startTime = Date.now();
+        const requestBody = JSON.stringify({
+            query: query,
+            variables: variables
+        });
+        
         const response = await fetch(url, {
             ...options,
-            body: JSON.stringify({
-                query: query,
-                variables: variables
-            })
+            body: requestBody
         });
-
+        
+        const duration = Date.now() - startTime;
         const rawData = await handleAnilistResponse(response);
         const allData = handleAniListData(rawData);
-        cache.set(cacheKey, allData);
         
+        // Track the API call in PostHog
+        posthog.capture({
+            distinctId: 'BookmarkAPI_Server',
+            event: 'anilist_api_call',
+            properties: {
+                operation: 'getAnimeContentFromAnilistByFilters',
+                method: 'POST',
+                request_headers: options.headers,
+                request_body: {
+                    filters: Object.keys(filters),
+                    page: variables.page,
+                    perPage: variables.perPage,
+                    filter_count: Object.keys(filters).length
+                },
+                response_status: response.status,
+                response_ok: response.ok,
+                duration_ms: duration,
+                success: true,
+                cached: false
+            }
+        });
+        
+        cache.set(cacheKey, allData);
         return allData;
     } catch (error) {
+        // Track the API call error in PostHog
+        posthog.capture({
+            distinctId: 'BookmarkAPI_Server',
+            event: 'anilist_api_call',
+            properties: {
+                operation: 'getAnimeContentFromAnilistByFilters',
+                method: 'POST',
+                request_body: {
+                    filters: Object.keys(filters),
+                    filter_count: Object.keys(filters).length,
+                    page: page,
+                    perPage: perPage
+                },
+                error_message: error.message,
+                error_stack: error.stack,
+                success: false
+            }
+        });
+        
         handleError(error);
         return {};
     }

@@ -5,6 +5,7 @@ const {
 } = require("../externalResponseHandlers.js");
 const cache = require("../cache/cache.js");
 const logger = require("../../utils/logger.js");
+const posthog = require("../posthog");
 origin = 'getById.js - getContentFromAnilistById()';
 
 // const query = global.config.aniList.query.getContentById; 
@@ -55,7 +56,23 @@ const getContentFromAnilistById = async (id) => {
     const cached = cache.get(cacheKey);
     
     if (cached) {
-        // console.log('Cache hit for key:', cacheKey);
+        // Track cache hit in PostHog
+        posthog.capture({
+            distinctId: 'BookmarkAPI_Server',
+            event: 'anilist_api_call',
+            properties: {
+                operation: 'getContentFromAnilistById',
+                method: 'CACHE',
+                request_body: {
+                    id: id
+                },
+                response_status: 200,
+                response_ok: true,
+                duration_ms: 0,
+                success: true,
+                cached: true
+            }
+        });
         return cached;
     }
 
@@ -64,22 +81,62 @@ const getContentFromAnilistById = async (id) => {
     };
 
     try {
-        
+        const startTime = Date.now();
         logger.info('fetching data from anilsit by ID', origin);
+        
+        const requestBody = JSON.stringify({
+            query: query,
+            variables: variables
+        });
+        
         const response = await fetch(url, {
             ...options,
-            body: JSON.stringify({
-                query: query,
-                variables: variables
-            })
+            body: requestBody
         });
-        logger.info('data fetched from anilsit by ID', origin);
         
+        logger.info('data fetched from anilsit by ID', origin);
+        const duration = Date.now() - startTime;
         const data = await handleAnilistResponse(response);
         const handledData = handleAniListData(data);
+        
+        // Track the API call in PostHog
+        posthog.capture({
+            distinctId: 'BookmarkAPI_Server',
+            event: 'anilist_api_call',
+            properties: {
+                operation: 'getContentFromAnilistById',
+                method: 'POST',
+                request_headers: options.headers,
+                request_body: {
+                    id: variables.id
+                },
+                response_status: response.status,
+                response_ok: response.ok,
+                duration_ms: duration,
+                success: true,
+                cached: false
+            }
+        });
+        
         cache.set(cacheKey, handledData);
         return handledData;
     } catch (error) {
+        // Track the API call error in PostHog
+        posthog.capture({
+            distinctId: 'BookmarkAPI_Server',
+            event: 'anilist_api_call',
+            properties: {
+                operation: 'getContentFromAnilistById',
+                method: 'POST',
+                request_body: {
+                    id: variables.id
+                },
+                error_message: error.message,
+                error_stack: error.stack,
+                success: false
+            }
+        });
+        
         logger.error(error, origin);
         handleError(error);
         throw error;
