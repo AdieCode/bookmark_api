@@ -23,7 +23,8 @@
     "lru-cache": "^11.1.0",
     "morgan": "^1.10.0",
     "on-finished": "^2.4.1",
-    "pg": "^8.12.0"
+    "pg": "^8.12.0",
+    "posthog-node": "^5.8.4"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"

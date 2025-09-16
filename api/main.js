@@ -4,12 +4,56 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 global.config = Object.freeze(require('./utils/configLoader/configLoader')());
+const { setupExpressErrorHandler } = require('posthog-node');
+posthog = require('./utils/posthog');
 
 // external packages
 require('dotenv').config();
 
 const { isAuthenticated, googleOAuth, githubOAuth } = require('./utils/Oauth/auth.js');
 const port = process.env.PORT || 3000;
+
+setupExpressErrorHandler(posthog, app);
+
+function trackEvent(req, res, next) {
+
+	if (req.method === 'OPTIONS') {
+		return next();
+	}
+	const startTime = Date.now();
+	
+	// When response finishes
+	res.on('finish', () => {
+		const duration = Date.now() - startTime;
+		
+		// Get user ID from JWT if available
+		const userId = req.user?.id || 'anonymous';
+		
+		// Capture API call event
+		posthog.capture({
+		distinctId: userId,
+		event: 'api_request',
+		url: req.originalUrl,
+		properties: {
+			method: req.method,
+			path: req.path,
+			route: req.route?.path,
+			query: req.query || 'not data available',
+			body: req.body || 'not data available',
+			response_body: res._responseBody || 'not data available',
+			status_code: res?.statusCode,
+			duration_ms: duration,
+			user_agent: req.headers['user-agent'],
+			ip: req.ip,
+			env: process.env.NODE_ENV || 'unknown',
+		}
+		});
+	});
+  
+	next();
+}
+
+app.use(trackEvent);
 
 // Utility function to mask password fields
 function maskSensitiveData(data) {
@@ -131,15 +175,36 @@ app.use('/user_content', userContentGet, userContentAdd, userContentUpdate);
 // Error-handling middleware
 app.use((err, req, res, next) => {
 	console.error(err.stack); // Log the error stack trace for debugging
+	const userId = req.user?.id || 'anonymous';
 	res.status(err.status || 500).json({
 	  error: {
 		message: err.message || 'Internal Server Error',
 	  },
 	});
-  });
+
+	posthog.captureException(err, userId, {
+			method: req.method,
+			path: req.path,
+			route: req.route?.path,
+			query: req.query || 'not data available',
+			body: req.body || 'not data available',
+			response_body: res._responseBody || 'not data available',
+			status_code: res?.statusCode,
+			duration_ms: duration,
+			user_agent: req.headers['user-agent'],
+			ip: req.ip,
+			env: process.env.NODE_ENV || 'unknown',
+	});
+});
+
   
 // Start the server
 app.listen(port, () => {
+	posthog.capture({
+		distinctId: 'BookmarkAPI_Server',
+		event: `server started up on port ${port}`,
+	});
+
   	console.log(`Server is running at http://localhost:${port}`);
 });
 
