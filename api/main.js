@@ -1,5 +1,7 @@
 const express = require('express');
 const app = express();
+// Trust proxy headers for platforms like Render
+app.set('trust proxy', true);
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
@@ -29,6 +31,17 @@ function trackEvent(req, res, next) {
 		// Get user ID from JWT if available
 		const userId = req.user?.id || 'anonymous';
 		
+		// Get the real IP address
+		const clientIp = req.headers['x-forwarded-for']?.split(',')[0].trim() || 
+			req.headers['x-real-ip'] || 
+			req.headers['cf-connecting-ip'] ||
+			req.headers['x-client-ip'] ||
+			req.headers['x-cluster-client-ip'] ||
+			req.headers['true-client-ip'] ||
+			req.connection?.remoteAddress ||
+			req.ip ||
+			'unknown';
+		
 		// Capture API call event
 		posthog.capture({
 		distinctId: userId,
@@ -44,7 +57,7 @@ function trackEvent(req, res, next) {
 			status_code: res?.statusCode,
 			duration_ms: duration,
 			user_agent: req.headers['user-agent'],
-			ip: req.ip,
+			ip: clientIp,
 			env: process.env.NODE_ENV || 'unknown',
 		}
 		});
