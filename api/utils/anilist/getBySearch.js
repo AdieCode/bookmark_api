@@ -77,6 +77,7 @@ const getContentBySearch = async (searchTerm = null, page = 1, perPage = 100, so
                     perPage: variables.perPage,
                     sort: variables.sort
                 },
+                query: query,
                 response_status: response.status,
                 response_ok: response.ok,
                 duration_ms: duration,
@@ -99,6 +100,7 @@ const getContentBySearch = async (searchTerm = null, page = 1, perPage = 100, so
                     perPage: variables.perPage,
                     sort: variables.sort
                 },
+                query: query,
                 error_message: error.message,
                 error_stack: error.stack,
                 success: false

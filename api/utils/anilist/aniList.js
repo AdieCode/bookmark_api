@@ -74,6 +74,7 @@ const getContentFromAnilist = async (type = null, searchTerm = null, page = 1, p
                     perPage: variables.perPage,
                     sort: variables.sort
                 },
+                query: query,
                 response_status: response.status,
                 response_ok: response.ok,
                 duration_ms: duration,

@@ -138,7 +138,8 @@ const getMangaContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
                 request_body: {
                     filters: filters,
                     page: page,
-                    perPage: perPage
+                    perPage: perPage,
+                    query: buildMangaQuery(filters, page).query
                 },
                 response_status: 200,
                 response_ok: true,
@@ -180,7 +181,8 @@ const getMangaContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
                     filters: Object.keys(filters),
                     page: variables.page,
                     perPage: variables.perPage,
-                    filter_count: Object.keys(filters).length
+                    filter_count: Object.keys(filters).length,
+                    query: query
                 },
                 response_status: response.status,
                 response_ok: response.ok,
@@ -216,7 +218,8 @@ const getAnimeContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
                 request_body: {
                     filters: filters,
                     page: page,
-                    perPage: perPage
+                    perPage: perPage,
+                    query: buildAnimeQuery(filters, page).query
                 },
                 response_status: 200,
                 response_ok: true,
@@ -259,7 +262,8 @@ const getAnimeContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
                     filters: Object.keys(filters),
                     page: variables.page,
                     perPage: variables.perPage,
-                    filter_count: Object.keys(filters).length
+                    filter_count: Object.keys(filters).length,
+                    query: query
                 },
                 response_status: response.status,
                 response_ok: response.ok,
@@ -283,7 +287,8 @@ const getAnimeContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
                     filters: Object.keys(filters),
                     filter_count: Object.keys(filters).length,
                     page: page,
-                    perPage: perPage
+                    perPage: perPage,
+                    query: buildAnimeQuery(filters, page).query
                 },
                 error_message: error.message,
                 error_stack: error.stack,

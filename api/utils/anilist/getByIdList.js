@@ -76,6 +76,7 @@ const getContentFromAnilistByIdList = async (idList,  page = 1, perPage = 100, s
                     page: variables.page,
                     perPage: variables.perPage
                 },
+                query: query,
                 response_status: response.status,
                 response_ok: response.ok,
                 duration_ms: duration,
@@ -98,6 +99,7 @@ const getContentFromAnilistByIdList = async (idList,  page = 1, perPage = 100, s
                     page: variables.page,
                     perPage: variables.perPage
                 },
+                query: query,
                 error_message: error.message,
                 error_stack: error.stack,
                 success: false

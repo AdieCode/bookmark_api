@@ -66,6 +66,7 @@ const getContentFromAnilistById = async (id) => {
                 request_body: {
                     id: id
                 },
+                query: query,
                 response_status: 200,
                 response_ok: true,
                 duration_ms: 0,
@@ -110,6 +111,7 @@ const getContentFromAnilistById = async (id) => {
                 request_body: {
                     id: variables.id
                 },
+                query: query,
                 response_status: response.status,
                 response_ok: response.ok,
                 duration_ms: duration,
@@ -131,6 +133,7 @@ const getContentFromAnilistById = async (id) => {
                 request_body: {
                     id: variables.id
                 },
+                query: query,
                 error_message: error.message,
                 error_stack: error.stack,
                 success: false
