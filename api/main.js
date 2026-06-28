@@ -203,7 +203,6 @@ app.use((err, req, res, next) => {
 			body: req.body || 'not data available',
 			response_body: res._responseBody || 'not data available',
 			status_code: res?.statusCode,
-			duration_ms: duration,
 			user_agent: req.headers['user-agent'],
 			ip: req.ip,
 			env: process.env.NODE_ENV || 'unknown',

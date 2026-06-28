@@ -8,11 +8,21 @@ const handleAnilistResponse = async (response) => {
 };
 
 const handleAniListData = (data) => {
+    console.log('Handling Anilist data:', JSON.stringify(data));
     if (data && data.data && data.data.Page && data.data.Page.media) {
         return data;
     } else {
         throw new Error('Anilist response data had an invalid data format');
     }
+};
+
+const handleAniListDataForCharacter = (data) => {
+    console.log('Handling Anilist character data:', data);
+    if (data && data.data && data.data.Character) {
+        return data;
+    } else {
+        throw new Error('Anilist response data for character had an invalid data format');
+    }   
 };
 
 // const handleAniListData = (data) => {
@@ -38,5 +48,6 @@ const handleError = (error) => {
 module.exports = {
     handleAnilistResponse,
     handleAniListData,
+    handleAniListDataForCharacter,
     handleError
 };

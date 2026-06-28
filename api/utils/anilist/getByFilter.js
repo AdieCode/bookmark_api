@@ -56,6 +56,7 @@ function buildMangaQuery(filters, page) {
     variables.isAdult = isAdult;
 
 
+
     console.log('mediaArgs -->', mediaArgs);
     console.log('variables -->', variables);
     
@@ -233,6 +234,8 @@ const getAnimeContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
 
     const {query, variables} = buildAnimeQuery(filters, page);
 
+    let rawData;
+
     try {
         console.log('calling anilist api for anime');
         const startTime = Date.now();
@@ -241,13 +244,13 @@ const getAnimeContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
             variables: variables
         });
         
-        const response = await fetch(url, {
+        const response = await fetch(url+'}', {
             ...options,
             body: requestBody
         });
         
         const duration = Date.now() - startTime;
-        const rawData = await handleAnilistResponse(response);
+        rawData = await handleAnilistResponse(response);
         const allData = handleAniListData(rawData);
         
         // Track the API call in PostHog
@@ -257,16 +260,17 @@ const getAnimeContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
             properties: {
                 operation: 'getAnimeContentFromAnilistByFilters',
                 method: 'POST',
-                request_headers: options.headers,
+                request_headers: options?.headers,
                 request_body: {
                     filters: Object.keys(filters),
-                    page: variables.page,
-                    perPage: variables.perPage,
+                    page: variables?.page,
+                    perPage: variables?.perPage,
                     filter_count: Object.keys(filters).length,
                     query: query
                 },
-                response_status: response.status,
-                response_ok: response.ok,
+                response_status: response?.status,
+                response_body: rawData,
+                response_ok: response?.ok,
                 duration_ms: duration,
                 success: true,
                 cached: false
@@ -292,6 +296,8 @@ const getAnimeContentFromAnilistByFilters = async (filters = {}, page = 1, perPa
                 },
                 error_message: error.message,
                 error_stack: error.stack,
+                response_status: response?.status,
+                response_body: rawData,
                 success: false
             }
         });

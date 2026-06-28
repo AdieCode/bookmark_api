@@ -8,7 +8,7 @@ cache:
 aniList:
     baseUrl: https://graphql.anilist.co
     options:
-        isAdult: false
+        isAdult: true
     query:
         media: |
             id
@@ -46,6 +46,7 @@ aniList:
                         genres 
                         description
                         type
+                        format
                         coverImage {
                             extraLarge
                         }
@@ -101,3 +102,30 @@ aniList:
                     }
                 }
             }
+        charactersData: |
+            age
+            gender
+            dateOfBirth {
+                year
+                month
+                day
+            }
+            bloodType
+            description
+            id
+            image {
+                medium
+                large
+            }
+            name {
+                alternative
+                alternativeSpoiler
+                first
+                full
+                middle
+                last
+                native
+            }
+            siteUrl
+            modNotes
+            favourites

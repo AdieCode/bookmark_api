@@ -35,14 +35,16 @@ const getContentFromAnilist = async (type = null, searchTerm = null, page = 1, p
         sort: searchTerm ? null : [sort] 
     };
 
+    const startTime = Date.now();
+
+    let response;
     try {
-        const startTime = Date.now();
         const requestBody = JSON.stringify({
             query: query,
             variables: variables
         });
         
-        const response = await fetch(url, {
+        response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -75,8 +77,9 @@ const getContentFromAnilist = async (type = null, searchTerm = null, page = 1, p
                     sort: variables.sort
                 },
                 query: query,
-                response_status: response.status,
-                response_ok: response.ok,
+                response_status: response?.status,
+                response_body: response,
+                response_ok: response?.ok,
                 duration_ms: duration,
                 success: true
             }
@@ -85,6 +88,7 @@ const getContentFromAnilist = async (type = null, searchTerm = null, page = 1, p
         return handleAniListData(data);
     } catch (error) {
         // Track the API call error in PostHog
+        const duration = Date.now() - startTime;
         posthog.capture({
             distinctId: 'BookmarkAPI_Server',
             event: 'anilist_api_call',
@@ -98,6 +102,9 @@ const getContentFromAnilist = async (type = null, searchTerm = null, page = 1, p
                     perPage: variables.perPage,
                     sort: variables.sort
                 },
+                duration_ms: duration,
+                response_status: response?.status,
+                error: error,
                 error_message: error.message,
                 error_stack: error.stack,
                 success: false

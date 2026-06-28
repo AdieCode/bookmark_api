@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const getContentFromAnilist = require("../../utils/anilist/aniList.js");
 const getContentFromAnilistById = require("../../utils/anilist/getById.js");
+const getCharacterDataFromAnilistById = require("../../utils/anilist/getCharacterById.js");
 const getContentBySearch = require("../../utils/anilist/getBySearch.js");
 const {getMangaContentFromAnilistByFilters, getAnimeContentFromAnilistByFilters} = require("../../utils/anilist/getByFilter.js");
 const enrich = require("../../utils/enrich.js")
@@ -107,6 +108,19 @@ router.get('/get_anime_content_by_id', async (req, res, next) => {
     } 
 });
 
+router.get('/get_character_data_by_id', async (req, res, next) => { 
+    const character_id = req.query.character_id;
+    try {
+        let fetchedData = await getCharacterDataFromAnilistById(character_id); 
+        const convertedFetchedResults = enrich.convertToStanderdCharacterFormat(fetchedData)  
+        const results = enrich.convertToSendBackFormat(null, convertedFetchedResults, true)
+        res.json(results); 
+    } catch (error) {
+        console.error('Error occurred /get_character_data_by_id:', error);
+        next(error);
+    } 
+});
+
 router.get('/get_content_by_search', async (req, res, next) => { 
     const search = req.query.search;
     const page = req.query?.page || 1;
@@ -161,30 +175,3 @@ router.post('/get_anime_content_by_filters', async (req, res, next) => {
 
 
 module.exports = router;
-
-// itemArray: {
-//   Page: {
-//     pageInfo: {
-//       total: 5000,
-//       currentPage: 1,
-//       lastPage: 100,
-//       hasNextPage: true,
-//       perPage: 50
-//     },
-//     media: [
-//       [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object],
-//       [Object], [Object]
-//     ]
-//   }
-// }

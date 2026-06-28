@@ -1,5 +1,5 @@
 const BookmarkDB = require('./pool.js');
-const { hashPassword } = require('../utils/Oauth/auth.js');
+const { hashPassword } = require('../utils/passwordUtils.js');
 const getData = require('./get.js');
 
 

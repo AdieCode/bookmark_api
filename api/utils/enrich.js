@@ -45,6 +45,7 @@ const enrich = {
                     description: relations.description || '',
                     cover_image_url: relations.coverImage?.extraLarge || relations.coverImage?.large || 'No Image',
                     type: relations.type || 'No Type', // Ensure type matches the database format
+                    media_format: media.format || 'No format found',
                     average_score: relations.averageScore || null,
                     volumes: relations.volumes || 0,
                     chapters: relations.chapters || 0,
@@ -132,6 +133,7 @@ const enrich = {
                 cover_image_url: media.coverImage.extraLarge || media.coverImage.large,
                 release_date: new Date(), // Default or actual release date if available
                 type: media.type, // Ensure type matches the database format
+                media_format: media.format || 'No format found',
                 average_score: media.averageScore || null,
                 volumes: media.volumes || 0,
                 chapters: media.chapters || 0,
@@ -148,6 +150,33 @@ const enrich = {
             return formattedDataEnriched;
         } catch (error) {
             throw new Error('Error formatting contentData : ' + error.message);
+        }
+    },
+
+    convertToStanderdCharacterFormat: function (characterData) {
+
+        if (!characterData || !characterData.data || !characterData.data.Character) {
+            throw new Error('Invalid characterData format');
+        }
+
+        try {
+            const char = characterData.data.Character;
+            const formattedData = {
+                character_content_id: char?.id || null,
+                name: char?.name?.full || (typeof char?.name === 'string' ? char.name : 'No name'),
+                description: char?.description || '',
+                character_image_url: char?.image?.large || char?.image?.medium || null,
+                age: char?.age || null,
+                gender: char?.gender || null,
+                date_of_birth: char?.dateOfBirth || null,
+                blood_type: char?.bloodType || null,
+                favourites: char?.favourites || 0,
+                site_url: char?.siteUrl || null
+            };
+
+            return formattedData;
+        } catch (error) {
+            throw new Error('Error formatting characterData: ' + error.message);
         }
     },
 
@@ -224,19 +253,28 @@ const enrich = {
         }
     },
 
-    convertToSendBackFormat: function(pageData, media) {
+    convertToSendBackFormat: function(pageData, data, is_character_data = false) {
         try {
-            const results = {
-                data: {
-                    page: pageData,
-                    media
+            let results;
+            if (is_character_data) {
+                results  = {
+                    data: data
+                }
+    
+            } else {
+                results = {
+                    data: {
+                        page: pageData,
+                        media: data
+                    }
                 }
             }
-            return results
+            return results;
+            
 
         } catch (error) {
-            return error
             console.error('Error occurred:', error);
+            return error
         }
     },
 }
